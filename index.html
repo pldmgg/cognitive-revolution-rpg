@@ -20,125 +20,3411 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cognitive Revolution RPG — The AI Transformation Journey</title>
+<title>The Cognitive Revolution — An AI Industry RPG</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --color-bg: #0a0e1a;
+    --color-surface: rgba(255,255,255,0.05);
+    --color-border: rgba(255,255,255,0.12);
+    --color-text: #e8e8ec;
+    --color-muted: #8888a0;
+    --color-accent: #4af0c0;
+    --color-danger: #ff4466;
+    --color-gold: #EAB308;
+    --color-mp: #6366f1;
+    --font-display: 'Cormorant Garamond', serif;
+    --font-body: 'Inter', sans-serif;
+  }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { 
-    width: 100%; height: 100%; overflow: hidden;
-    background: #0a0e1a; color: #e8e8ec;
-    font-family: 'Inter', sans-serif;
-  }
-  #game-canvas {
-    display: block;
+  html, body {
     width: 100%; height: 100%;
-    image-rendering: auto;
-    cursor: default;
+    background: var(--color-bg);
+    overflow: hidden;
+    font-family: var(--font-body);
   }
-  #loading-screen {
-    position: fixed; inset: 0; z-index: 100;
-    background: #0a0e1a;
+  #game-container {
+    width: 100%; height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  canvas {
+    display: block;
+    image-rendering: auto;
+  }
+  #loading-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: var(--color-bg);
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    font-family: 'Cormorant Garamond', serif;
-    transition: opacity 0.5s;
+    gap: 20px;
+    transition: opacity 0.6s;
   }
-  #loading-screen.hidden { opacity: 0; pointer-events: none; }
-  #loading-screen h1 {
-    font-size: 36px; font-weight: 700; color: #4af0c0;
-    margin-bottom: 16px; letter-spacing: 2px;
+  #loading-overlay.hidden {
+    opacity: 0; pointer-events: none;
   }
-  #loading-screen .bar-bg {
-    width: 300px; height: 6px; border-radius: 3px;
+  #loading-overlay h1 {
+    font-family: var(--font-display);
+    font-size: 42px; font-weight: 700;
+    color: var(--color-accent);
+    letter-spacing: 3px;
+    text-align: center;
+  }
+  #loading-overlay p {
+    color: var(--color-muted);
+    font-size: 14px;
+  }
+  .load-bar-bg {
+    width: 320px; height: 6px;
     background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
   }
-  #loading-screen .bar-fill {
-    height: 100%; border-radius: 3px;
-    background: #4af0c0; width: 0%;
-    transition: width 0.3s;
+  #load-bar-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--color-accent), #3B82F6);
+    border-radius: 3px;
+    transition: width 0.3s ease;
   }
-  #loading-screen .load-text {
-    margin-top: 12px; font-family: 'Inter', sans-serif;
-    font-size: 13px; color: #8888a0;
+  #load-status {
+    font-size: 12px;
+    color: var(--color-muted);
+    letter-spacing: 1px;
   }
   footer {
     position: fixed; bottom: 6px; right: 10px; z-index: 50;
-    font-size: 11px; opacity: 0.4;
+    font-size: 11px; opacity: 0.35;
   }
-  footer a { color: #8888a0; text-decoration: none; }
-  footer a:hover { color: #4af0c0; }
+  footer a { color: var(--color-muted); text-decoration: none; }
+  footer a:hover { color: var(--color-accent); opacity: 1; }
 </style>
 </head>
 <body>
 
-<div id="loading-screen">
-  <h1>COGNITIVE REVOLUTION</h1>
-  <div class="bar-bg"><div class="bar-fill" id="load-bar"></div></div>
-  <div class="load-text" id="load-text">Loading assets...</div>
+<div id="loading-overlay">
+  <h1>THE COGNITIVE<br>REVOLUTION</h1>
+  <div class="load-bar-bg"><div id="load-bar-fill"></div></div>
+  <div id="load-status">Initializing...</div>
+  <p>An Interactive AI Industry Journey</p>
 </div>
+<script>
+// Animate loading bar while assets load
+(function() {
+  const fill = document.getElementById('load-bar-fill');
+  const status = document.getElementById('load-status');
+  let progress = 0;
+  const messages = ['Loading game engine...', 'Preparing characters...', 'Building world...', 'Almost ready...'];
+  let msgIdx = 0;
+  const interval = setInterval(() => {
+    progress = Math.min(95, progress + (Math.random() * 8 + 2));
+    fill.style.width = progress + '%';
+    if (Math.floor(progress / 25) > msgIdx) {
+      msgIdx = Math.floor(progress / 25);
+      if (messages[msgIdx]) status.textContent = messages[msgIdx];
+    }
+  }, 180);
+  // Stop when Phaser is ready
+  window._stopLoadAnim = function() {
+    clearInterval(interval);
+    fill.style.width = '100%';
+    status.textContent = 'Ready!';
+  };
+})();
+</script>
 
-<canvas id="game-canvas"></canvas>
+<div id="game-container"></div>
 
-<!-- Preload battle backgrounds and title screen via <img> -->
-<img id="img-title" src="assets/title-screen.png" style="display:none">
-<img id="img-battle-digital" src="assets/battle-bg-digital.png" style="display:none">
-<img id="img-battle-corporate" src="assets/battle-bg-corporate.png" style="display:none">
-<img id="img-battle-knowledge" src="assets/battle-bg-knowledge.png" style="display:none">
-<img id="img-battle-power" src="assets/battle-bg-power.png" style="display:none">
-<img id="img-player" src="assets/player-character.png" style="display:none">
+<!-- Preload portrait images via <img> tags to bypass fetch restrictions -->
+<div style="display:none">
+  <img id="portrait-alex-chen"       src="assets/portraits/alex-chen.png"       alt="">
+  <img id="portrait-maya-torres"     src="assets/portraits/maya-torres.png"     alt="">
+  <img id="portrait-james-wright"    src="assets/portraits/james-wright.png"    alt="">
+  <img id="portrait-zara-kim"        src="assets/portraits/zara-kim.png"        alt="">
+  <img id="portrait-kai-rhythm"      src="assets/portraits/kai-rhythm.png"      alt="">
+  <img id="portrait-diana-price"     src="assets/portraits/diana-price.png"     alt="">
+  <img id="portrait-marcus-gold"     src="assets/portraits/marcus-gold.png"     alt="">
+  <img id="portrait-sarah-lane"      src="assets/portraits/sarah-lane.png"      alt="">
+  <img id="portrait-ravi-patel"      src="assets/portraits/ravi-patel.png"      alt="">
+  <img id="portrait-victoria-chase"  src="assets/portraits/victoria-chase.png"  alt="">
+  <img id="portrait-tom-realty"      src="assets/portraits/tom-realty.png"      alt="">
+  <img id="portrait-jade-spark"      src="assets/portraits/jade-spark.png"      alt="">
+  <img id="portrait-commander-hayes" src="assets/portraits/commander-hayes.png" alt="">
+  <img id="portrait-ada-future"      src="assets/portraits/ada-future.png"      alt="">
+  <img id="img-title"                src="assets/title-screen.png"              alt="">
+  <img id="img-battle-digital"       src="assets/battle-bg-digital.png"         alt="">
+  <img id="img-battle-corporate"     src="assets/battle-bg-corporate.png"       alt="">
+  <img id="img-battle-knowledge"     src="assets/battle-bg-knowledge.png"       alt="">
+  <img id="img-battle-power"         src="assets/battle-bg-power.png"           alt="">
+</div>
 
 <footer>
   <a href="https://www.perplexity.ai/computer" target="_blank" rel="noopener noreferrer">Created with Perplexity Computer</a>
 </footer>
 
-<script src="ui.js"></script>
-<script src="audio.js"></script>
-<script src="data.js"></script>
-<script src="combat.js"></script>
-<script src="tilemap.js"></script>
-<script src="player.js"></script>
-<script src="scenes.js"></script>
-<script src="engine.js"></script>
+<!-- Game Data (loaded first, as globals) -->
+<script src="js/GameData.js"></script>
+<script src="js/AudioSystem.js"></script>
 
+<!-- Phaser 3 CDN -->
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
+
+<!-- Phaser 3 Game Scenes -->
 <script>
-// Wait for fonts and images, then start
-document.fonts.ready.then(() => {
-  const images = [
-    'img-title', 'img-battle-digital', 'img-battle-corporate',
-    'img-battle-knowledge', 'img-battle-power', 'img-player'
-  ];
-  let loaded = 0;
-  const total = images.length;
-  const bar = document.getElementById('load-bar');
-  const text = document.getElementById('load-text');
+/* ==========================================================================
+   UTILITY HELPERS
+   ========================================================================== */
+const Hex2Int = c => parseInt(c.replace('#',''), 16);
+const IntHex = n => '#' + n.toString(16).padStart(6, '0');
 
-  function checkReady() {
-    loaded++;
-    const pct = Math.floor((loaded / total) * 100);
-    bar.style.width = pct + '%';
-    text.textContent = `Loading assets... ${loaded}/${total}`;
-    if (loaded >= total) {
-      setTimeout(() => {
-        document.getElementById('loading-screen').classList.add('hidden');
-        setTimeout(() => {
-          document.getElementById('loading-screen').style.display = 'none';
-          Engine.init();
-        }, 500);
-      }, 300);
+// Draw a colored bar on a Phaser Graphics object
+function drawBar(gfx, x, y, w, h, val, max, color, bgColor) {
+  const pct = Math.max(0, Math.min(1, val / max));
+  gfx.fillStyle(bgColor || 0x1a1a2e, 1);
+  gfx.fillRect(x, y, w, h);
+  gfx.fillStyle(color, 1);
+  gfx.fillRect(x, y, Math.floor(w * pct), h);
+  gfx.fillStyle(0xffffff, 0.08);
+  gfx.fillRect(x, y, w, Math.ceil(h / 3));
+}
+
+// Isometric coordinate helpers
+const ISO_TW = 64, ISO_TH = 32;
+
+function tileToScreen(tx, ty, offsetX, offsetY) {
+  return {
+    x: (tx - ty) * (ISO_TW / 2) + offsetX,
+    y: (tx + ty) * (ISO_TH / 2) + offsetY
+  };
+}
+
+/* ==========================================================================
+   BOOT SCENE
+   ========================================================================== */
+class BootScene extends Phaser.Scene {
+  constructor() { super({ key: 'Boot' }); }
+
+  preload() {
+    // Load minimal assets (nothing needed — portraits loaded via <img>)
+    this.load.on('complete', () => {});
+  }
+
+  create() {
+    this.scene.start('Preload');
+  }
+}
+
+/* ==========================================================================
+   PRELOAD SCENE
+   ========================================================================== */
+class PreloadScene extends Phaser.Scene {
+  constructor() { super({ key: 'Preload' }); }
+
+  create() {
+    // Register portrait textures from pre-loaded <img> elements
+    const portraits = [
+      'alex-chen','maya-torres','james-wright','zara-kim','kai-rhythm',
+      'diana-price','marcus-gold','sarah-lane','ravi-patel','victoria-chase',
+      'tom-realty','jade-spark','commander-hayes','ada-future'
+    ];
+    portraits.forEach(name => {
+      const el = document.getElementById('portrait-' + name);
+      if (el && el.complete && el.naturalWidth > 0) {
+        const texture = this.textures.createCanvas('portrait-' + name, el.naturalWidth, el.naturalHeight);
+        const ctx = texture.getContext();
+        ctx.drawImage(el, 0, 0);
+        texture.refresh();
+      }
+    });
+
+    // Register battle backgrounds from <img> elements
+    ['digital','corporate','knowledge','power'].forEach(key => {
+      const el = document.getElementById('img-battle-' + key);
+      if (el && el.complete && el.naturalWidth > 0) {
+        const texture = this.textures.createCanvas('battle-bg-' + key, el.naturalWidth, el.naturalHeight);
+        const ctx = texture.getContext();
+        ctx.drawImage(el, 0, 0);
+        texture.refresh();
+      }
+    });
+
+    // Title screen
+    const titleEl = document.getElementById('img-title');
+    if (titleEl && titleEl.complete && titleEl.naturalWidth > 0) {
+      const texture = this.textures.createCanvas('title-screen', titleEl.naturalWidth, titleEl.naturalHeight);
+      const ctx = texture.getContext();
+      ctx.drawImage(titleEl, 0, 0);
+      texture.refresh();
+    }
+
+    // Store player reference in registry
+    this.registry.set('player', null);
+    this.registry.set('currentTown', null);
+
+    // Update loading overlay to done
+    if (typeof window._stopLoadAnim === 'function') window._stopLoadAnim();
+
+    // Short delay then go to title
+    this.time.delayedCall(400, () => {
+      const overlay = document.getElementById('loading-overlay');
+      if (overlay) overlay.classList.add('hidden');
+      this.scene.start('Title');
+    });
+  }
+}
+
+/* ==========================================================================
+   TITLE SCENE
+   ========================================================================== */
+class TitleScene extends Phaser.Scene {
+  constructor() { super({ key: 'Title' }); }
+
+  create() {
+    const W = this.scale.width, H = this.scale.height;
+
+    // Background
+    if (this.textures.exists('title-screen')) {
+      const bg = this.add.image(W/2, H/2, 'title-screen');
+      bg.setDisplaySize(W, H);
+      // Dark overlay
+      const overlay = this.add.rectangle(W/2, H/2, W, H, 0x0a0e1a, 0.6);
+    } else {
+      this.add.rectangle(W/2, H/2, W, H, 0x0a0e1a, 1);
+      // Animated particles
+      const g = this.add.graphics();
+      this._particles = [];
+      for (let i = 0; i < 60; i++) {
+        this._particles.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          r: Math.random() * 1.5 + 0.5,
+          speed: Math.random() * 0.3 + 0.1,
+          color: [0x4af0c0, 0x3B82F6, 0x8B5CF6, 0xEAB308][Math.floor(Math.random() * 4)]
+        });
+      }
+      this._particleGfx = g;
+    }
+
+    // Vignette — drawn using canvas gradient texture
+    if (this.textures.exists('__vignette__')) this.textures.remove('__vignette__');
+    const vigCanvas = this.textures.createCanvas('__vignette__', W, H);
+    const vigCtx = vigCanvas.getContext();
+    const grad = vigCtx.createRadialGradient(W/2, H/2, H*0.25, W/2, H/2, H*0.75);
+    grad.addColorStop(0, 'rgba(0,0,0,0)');
+    grad.addColorStop(1, 'rgba(0,0,0,0.75)');
+    vigCtx.fillStyle = grad;
+    vigCtx.fillRect(0, 0, W, H);
+    vigCanvas.refresh();
+    this.add.image(W/2, H/2, '__vignette__').setDepth(5);
+
+    // Title text
+    const titleStyle = {
+      fontFamily: "'Cormorant Garamond', serif",
+      fontSize: '64px',
+      fontStyle: 'bold',
+      color: '#4af0c0',
+      shadow: { color: '#4af0c0', blur: 30, fill: true }
+    };
+    this.add.text(W/2, H * 0.22, 'THE COGNITIVE', { ...titleStyle, fontSize: '56px' }).setOrigin(0.5);
+    this.add.text(W/2, H * 0.32, 'REVOLUTION', { ...titleStyle, fontSize: '72px' }).setOrigin(0.5);
+    this.add.text(W/2, H * 0.41, 'An Interactive AI Industry Journey', {
+      fontFamily: "'Inter', sans-serif",
+      fontSize: '18px', color: '#8888a0'
+    }).setOrigin(0.5);
+
+    // New Game button
+    const btnW = 220, btnH = 52;
+    const btnX = W/2 - btnW/2, btnY = H * 0.58 - btnH/2;
+    const btnBg = this.add.graphics();
+    btnBg.fillStyle(0x4af0c0, 0.15);
+    btnBg.lineStyle(2, 0x4af0c0, 0.8);
+    btnBg.strokeRect(btnX, btnY, btnW, btnH);
+    btnBg.fillRect(btnX, btnY, btnW, btnH);
+
+    const btnText = this.add.text(W/2, H * 0.58, 'NEW GAME', {
+      fontFamily: "'Inter', sans-serif",
+      fontSize: '20px', fontStyle: 'bold',
+      color: '#4af0c0',
+      shadow: { color: '#4af0c0', blur: 10, fill: true }
+    }).setOrigin(0.5);
+
+    // Interactive area
+    const btn = this.add.zone(W/2, H * 0.58, btnW, btnH).setInteractive({ cursor: 'pointer' });
+    btn.on('pointerover', () => {
+      btnBg.clear();
+      btnBg.fillStyle(0x4af0c0, 0.25);
+      btnBg.lineStyle(2, 0x4af0c0, 1);
+      btnBg.strokeRect(btnX, btnY, btnW, btnH);
+      btnBg.fillRect(btnX, btnY, btnW, btnH);
+      btnText.setColor('#ffffff');
+    });
+    btn.on('pointerout', () => {
+      btnBg.clear();
+      btnBg.fillStyle(0x4af0c0, 0.15);
+      btnBg.lineStyle(2, 0x4af0c0, 0.8);
+      btnBg.strokeRect(btnX, btnY, btnW, btnH);
+      btnBg.fillRect(btnX, btnY, btnW, btnH);
+      btnText.setColor('#4af0c0');
+    });
+    btn.on('pointerdown', () => {
+      Audio.init(); Audio.resume(); Audio.menuSelect();
+      this.cameras.main.fadeOut(400, 10, 14, 26);
+      this.cameras.main.once('camerafadeoutcomplete', () => {
+        this.scene.start('CharSelect');
+      });
+    });
+
+    // Keyboard
+    this.input.keyboard.on('keydown-ENTER', () => {
+      Audio.init(); Audio.resume(); Audio.menuSelect();
+      this.cameras.main.fadeOut(400, 10, 14, 26);
+      this.cameras.main.once('camerafadeoutcomplete', () => { this.scene.start('CharSelect'); });
+    });
+
+    // Controls hint
+    this.add.text(W/2, H * 0.78, 'Arrow Keys: Move  |  E / Space: Interact  |  I: Inventory', {
+      fontFamily: "'Inter', sans-serif",
+      fontSize: '13px', color: '#555566', alpha: 0.6
+    }).setOrigin(0.5);
+
+    // Version
+    this.add.text(W/2, H * 0.93, 'v3.0 — Phaser 3 Edition', {
+      fontFamily: "'Inter', sans-serif",
+      fontSize: '11px', color: '#444'
+    }).setOrigin(0.5);
+
+    // Blink animation on button
+    this.tweens.add({
+      targets: btnText,
+      alpha: { from: 0.7, to: 1 },
+      duration: 800,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut'
+    });
+
+    this.cameras.main.fadeIn(500, 10, 14, 26);
+  }
+
+  update(time) {
+    if (this._particleGfx && this._particles) {
+      this._particleGfx.clear();
+      this._particles.forEach(p => {
+        p.y -= p.speed;
+        if (p.y < 0) { p.y = this.scale.height; p.x = Math.random() * this.scale.width; }
+        this._particleGfx.fillStyle(p.color, 0.6);
+        this._particleGfx.fillCircle(p.x, p.y, p.r);
+      });
+    }
+  }
+}
+
+/* ==========================================================================
+   CHARACTER SELECT SCENE
+   ========================================================================== */
+class CharSelectScene extends Phaser.Scene {
+  constructor() { super({ key: 'CharSelect' }); }
+
+  create() {
+    const W = this.scale.width, H = this.scale.height;
+    this._selected = null;
+    this._cards = [];
+
+    // Background
+    this.add.rectangle(W/2, H/2, W, H, 0x0a0e1a, 1);
+
+    // Title
+    this.add.text(W/2, 36, 'Choose Your Character', {
+      fontFamily: "'Cormorant Garamond', serif",
+      fontSize: '36px', fontStyle: 'bold',
+      color: '#4af0c0',
+      shadow: { color: '#4af0c0', blur: 20, fill: true }
+    }).setOrigin(0.5, 0.5);
+
+    this.add.text(W/2, 68, 'Each character represents an AI-transformed industry. Your starting town and abilities reflect your choice.',{
+      fontFamily: "'Inter', sans-serif",
+      fontSize: '13px', color: '#8888a0'
+    }).setOrigin(0.5, 0.5);
+
+    // Character grid
+    const keys = Object.keys(CHARACTER_DATA);
+    const cols = 7, rows = Math.ceil(keys.length / cols);
+    const cardW = Math.floor((W - 40) / cols) - 6;
+    const cardH = 200;
+    const totalW = cols * (cardW + 6) - 6;
+    const startX = (W - totalW) / 2;
+    const startY = 90;
+
+    keys.forEach((key, idx) => {
+      const char = CHARACTER_DATA[key];
+      const ind = INDUSTRIES[key];
+      const col = idx % cols;
+      const row = Math.floor(idx / cols);
+      const cx = startX + col * (cardW + 6);
+      const cy = startY + row * (cardH + 8);
+
+      // Card container
+      const container = this.add.container(cx + cardW/2, cy + cardH/2);
+      const indColor = Hex2Int(char.color);
+
+      // Card BG
+      const cardBg = this.add.graphics();
+      cardBg.fillStyle(0x12152a, 0.95);
+      cardBg.lineStyle(1, 0x2a2a4a, 1);
+      cardBg.strokeRect(-cardW/2, -cardH/2, cardW, cardH);
+      cardBg.fillRect(-cardW/2, -cardH/2, cardW, cardH);
+      // Color accent bar on top
+      cardBg.fillStyle(indColor, 0.8);
+      cardBg.fillRect(-cardW/2, -cardH/2, cardW, 3);
+      container.add(cardBg);
+
+      // Portrait image or fallback
+      const portraitKey = 'portrait-' + char.portrait;
+      if (this.textures.exists(portraitKey)) {
+        const portrait = this.add.image(0, -cardH/2 + 44, portraitKey)
+          .setDisplaySize(70, 70)
+          .setOrigin(0.5, 0.5);
+        container.add(portrait);
+        // Circular clip via mask
+        const mask = this.add.graphics();
+        mask.fillStyle(0xffffff, 1);
+        mask.fillCircle(cx + cardW/2, cy + cardH/2 - cardH/2 + 44, 36);
+        portrait.setMask(mask.createGeometryMask());
+      } else {
+        // Fallback: colored circle
+        const circle = this.add.graphics();
+        circle.fillStyle(indColor, 0.25);
+        circle.fillCircle(0, -cardH/2 + 44, 32);
+        circle.fillStyle(indColor, 0.9);
+        circle.fillCircle(0, -cardH/2 + 30, 10);
+        circle.fillRect(-6, -cardH/2 + 42, 12, 16);
+        container.add(circle);
+      }
+
+      // Name
+      container.add(this.add.text(0, -cardH/2 + 90, char.name, {
+        fontFamily: "'Inter', sans-serif",
+        fontSize: '12px', fontStyle: 'bold',
+        color: '#ffffff'
+      }).setOrigin(0.5, 0.5));
+
+      // Title/class
+      container.add(this.add.text(0, -cardH/2 + 106, char.title, {
+        fontFamily: "'Inter', sans-serif",
+        fontSize: '10px',
+        color: char.color
+      }).setOrigin(0.5, 0.5));
+
+      // Industry
+      container.add(this.add.text(0, -cardH/2 + 120, ind ? ind.name.split('/')[0].trim() : key, {
+        fontFamily: "'Inter', sans-serif",
+        fontSize: '9px', color: '#8888a0'
+      }).setOrigin(0.5, 0.5));
+
+      // Mini stats
+      const s = char.stats;
+      const statData = [['HP', s.hp, 120], ['ATK', s.atk, 16], ['DEF', s.def, 16], ['INT', s.int, 16]];
+      statData.forEach(([label, val, max], si) => {
+        const sy = -cardH/2 + 136 + si * 14;
+        container.add(this.add.text(-cardW/2 + 6, sy, label, {
+          fontFamily: "'Inter', sans-serif",
+          fontSize: '9px', color: '#666677'
+        }));
+        const barBg = this.add.graphics();
+        barBg.fillStyle(0x222233, 1);
+        barBg.fillRect(-cardW/2 + 28, sy + 1, cardW - 40, 6);
+        barBg.fillStyle(indColor, 0.85);
+        barBg.fillRect(-cardW/2 + 28, sy + 1, Math.floor((cardW - 40) * Math.min(1, val / max)), 6);
+        container.add(barBg);
+        container.add(this.add.text(cardW/2 - 4, sy, '' + val, {
+          fontFamily: "'Inter', sans-serif",
+          fontSize: '9px', color: '#aaaacc'
+        }).setOrigin(1, 0));
+      });
+
+      // Interactive zone
+      const zone = this.add.zone(cx + cardW/2, cy + cardH/2, cardW, cardH).setInteractive({ cursor: 'pointer' });
+      zone.on('pointerover', () => this._hoverCard(key, cardBg, cardW, cardH, indColor));
+      zone.on('pointerout', () => this._unhoverCard(key, cardBg, cardW, cardH, indColor));
+      zone.on('pointerdown', () => {
+        Audio.init(); Audio.resume(); Audio.uiClick();
+        this._selectCard(key, cardBg, cardW, cardH, indColor);
+      });
+
+      this._cards.push({ key, cardBg, cardW, cardH, indColor });
+    });
+
+    // Start button (hidden initially)
+    this._startBtnContainer = this.add.container(W/2, H - 44).setVisible(false);
+    const startBg = this.add.graphics();
+    startBg.fillStyle(0x4af0c0, 0.2);
+    startBg.lineStyle(2, 0x4af0c0, 1);
+    startBg.strokeRect(-110, -22, 220, 44);
+    startBg.fillRect(-110, -22, 220, 44);
+    this._startBtnContainer.add(startBg);
+    this._startBtnText = this.add.text(0, 0, 'START JOURNEY', {
+      fontFamily: "'Inter', sans-serif",
+      fontSize: '18px', fontStyle: 'bold',
+      color: '#4af0c0'
+    }).setOrigin(0.5);
+    this._startBtnContainer.add(this._startBtnText);
+
+    const startZone = this.add.zone(W/2, H - 44, 220, 44).setInteractive({ cursor: 'pointer' });
+    startZone.on('pointerdown', () => { if (this._selected) this._startGame(this._selected); });
+    startZone.on('pointerover', () => {
+      startBg.clear();
+      startBg.fillStyle(0x4af0c0, 0.35);
+      startBg.lineStyle(2, 0x4af0c0, 1);
+      startBg.strokeRect(-110, -22, 220, 44);
+      startBg.fillRect(-110, -22, 220, 44);
+    });
+    startZone.on('pointerout', () => {
+      startBg.clear();
+      startBg.fillStyle(0x4af0c0, 0.2);
+      startBg.lineStyle(2, 0x4af0c0, 1);
+      startBg.strokeRect(-110, -22, 220, 44);
+      startBg.fillRect(-110, -22, 220, 44);
+    });
+
+    // Selection info panel
+    this._infoText = this.add.text(W/2, H - 44, 'Click a character to select', {
+      fontFamily: "'Inter', sans-serif",
+      fontSize: '14px', color: '#8888a0'
+    }).setOrigin(0.5);
+
+    // Enter key
+    this.input.keyboard.on('keydown-ENTER', () => {
+      if (this._selected) this._startGame(this._selected);
+    });
+
+    this.cameras.main.fadeIn(400, 10, 14, 26);
+  }
+
+  _hoverCard(key, cardBg, cardW, cardH, indColor) {
+    if (this._selected === key) return;
+    cardBg.clear();
+    cardBg.fillStyle(0x16192e, 0.95);
+    cardBg.lineStyle(1, indColor, 0.5);
+    cardBg.strokeRect(-cardW/2, -cardH/2, cardW, cardH);
+    cardBg.fillRect(-cardW/2, -cardH/2, cardW, cardH);
+    cardBg.fillStyle(indColor, 0.8);
+    cardBg.fillRect(-cardW/2, -cardH/2, cardW, 3);
+  }
+
+  _unhoverCard(key, cardBg, cardW, cardH, indColor) {
+    if (this._selected === key) return;
+    cardBg.clear();
+    cardBg.fillStyle(0x12152a, 0.95);
+    cardBg.lineStyle(1, 0x2a2a4a, 1);
+    cardBg.strokeRect(-cardW/2, -cardH/2, cardW, cardH);
+    cardBg.fillRect(-cardW/2, -cardH/2, cardW, cardH);
+    cardBg.fillStyle(indColor, 0.8);
+    cardBg.fillRect(-cardW/2, -cardH/2, cardW, 3);
+  }
+
+  _selectCard(key, cardBg, cardW, cardH, indColor) {
+    // Deselect previous
+    if (this._selected) {
+      const prev = this._cards.find(c => c.key === this._selected);
+      if (prev) this._unhoverCard(prev.key, prev.cardBg, prev.cardW, prev.cardH, prev.indColor);
+    }
+    this._selected = key;
+    // Highlight selected
+    cardBg.clear();
+    cardBg.fillStyle(0x1a2040, 1);
+    cardBg.lineStyle(2, indColor, 1);
+    cardBg.strokeRect(-cardW/2, -cardH/2, cardW, cardH);
+    cardBg.fillRect(-cardW/2, -cardH/2, cardW, cardH);
+    cardBg.fillStyle(indColor, 1);
+    cardBg.fillRect(-cardW/2, -cardH/2, cardW, 3);
+    // Glow effect
+    cardBg.lineStyle(1, indColor, 0.3);
+    cardBg.strokeRect(-cardW/2 - 2, -cardH/2 - 2, cardW + 4, cardH + 4);
+
+    // Show start button
+    const char = CHARACTER_DATA[key];
+    this._startBtnContainer.setVisible(true);
+    this._infoText.setVisible(false);
+    this._startBtnText.setText(`START AS ${char.name.split(' ')[0].toUpperCase()}`);
+  }
+
+  _startGame(industryKey) {
+    Audio.mapTravel();
+    const player = createNewPlayer(industryKey);
+    this.registry.set('player', player);
+    this.registry.set('currentTown', industryKey);
+
+    this.cameras.main.fadeOut(500, 10, 14, 26);
+    this.cameras.main.once('camerafadeoutcomplete', () => {
+      this.scene.start('Town', { townId: industryKey });
+    });
+  }
+}
+
+/* ==========================================================================
+   ISOMETRIC TILE RENDERER HELPERS
+   ========================================================================== */
+const TILE_COLORS = {
+  [TILE.VOID]:     { top: 0x050710, left: 0x050710, right: 0x050710 },
+  [TILE.STONE]:    { top: 0x4a4a5e, left: 0x3a3a4e, right: 0x323240 },
+  [TILE.WALL]:     { top: 0x2a2a3e, left: 0x1a1a2e, right: 0x151525 },
+  [TILE.WATER]:    { top: 0x1a5fa8, left: 0x144c88, right: 0x103c6e },
+  [TILE.GRASS]:    { top: 0x2d5a2d, left: 0x1e3e1e, right: 0x183318 },
+  [TILE.TECH]:     { top: 0x1a3a4a, left: 0x112a38, right: 0x0e2230 },
+  [TILE.COBBLE]:   { top: 0x5a5a6e, left: 0x4a4a5e, right: 0x3e3e52 },
+  [TILE.DIRT]:     { top: 0x7a5a3a, left: 0x6a4a2a, right: 0x5a3e22 },
+  [TILE.WOOD]:     { top: 0x7a5a2a, left: 0x6a4a1a, right: 0x5a3e15 },
+  [TILE.SAND]:     { top: 0xcaa060, left: 0xb89050, right: 0xa08040 },
+  [TILE.TREE]:     { top: 0x1e4a1e, left: 0x143414, right: 0x0e2a0e },
+  [TILE.MOUNTAIN]: { top: 0x5a5a6e, left: 0x3a3a4e, right: 0x2a2a3e },
+  [TILE.BUILDING]: { top: 0x3a3a5e, left: 0x252540, right: 0x1e1e35 },
+  [TILE.ROAD]:     { top: 0x444450, left: 0x383844, right: 0x2e2e3a }
+};
+
+function drawIsoTile(g, sx, sy, tileType, alpha) {
+  const TW = ISO_TW, TH = ISO_TH;
+  const colors = TILE_COLORS[tileType] || TILE_COLORS[TILE.STONE];
+  const a = alpha !== undefined ? alpha : 1;
+
+  // Top face
+  g.fillStyle(colors.top, a);
+  g.beginPath();
+  g.moveTo(sx, sy - TH/2);
+  g.lineTo(sx + TW/2, sy);
+  g.lineTo(sx, sy + TH/2);
+  g.lineTo(sx - TW/2, sy);
+  g.closePath();
+  g.fill();
+
+  // For non-flat tiles, draw left/right faces
+  if ([TILE.WALL, TILE.BUILDING, TILE.TREE, TILE.MOUNTAIN].includes(tileType)) {
+    const height = tileType === TILE.TREE ? 28 : tileType === TILE.MOUNTAIN ? 20 : 18;
+    // Left face
+    g.fillStyle(colors.left, a);
+    g.beginPath();
+    g.moveTo(sx - TW/2, sy - height);
+    g.lineTo(sx, sy + TH/2 - height);
+    g.lineTo(sx, sy + TH/2);
+    g.lineTo(sx - TW/2, sy);
+    g.closePath();
+    g.fill();
+    // Right face
+    g.fillStyle(colors.right, a);
+    g.beginPath();
+    g.moveTo(sx + TW/2, sy - height);
+    g.lineTo(sx, sy + TH/2 - height);
+    g.lineTo(sx, sy + TH/2);
+    g.lineTo(sx + TW/2, sy);
+    g.closePath();
+    g.fill();
+  }
+
+  // Tree crown
+  if (tileType === TILE.TREE) {
+    g.fillStyle(0x2a7a2a, a);
+    g.fillCircle(sx, sy - 28, 14);
+    g.fillStyle(0x1e5e1e, a);
+    g.fillCircle(sx - 5, sy - 32, 10);
+    g.fillStyle(0x3a9a3a, a);
+    g.fillCircle(sx + 4, sy - 34, 8);
+  }
+
+  // Water shimmer
+  if (tileType === TILE.WATER) {
+    g.fillStyle(0x4488cc, a * 0.3);
+    g.beginPath();
+    g.moveTo(sx - 10, sy);
+    g.lineTo(sx + 10, sy - 5);
+    g.lineTo(sx + 14, sy);
+    g.lineTo(sx - 6, sy + 5);
+    g.closePath();
+    g.fill();
+  }
+}
+
+function drawIsoBuilding(g, sx, sy, color, height, label, time) {
+  const TW = ISO_TW, TH = ISO_TH;
+  const h = height || 32;
+  const c = color || 0x3a3a5e;
+  const cLight = Math.min(0xffffff, c + 0x202030);
+  const cDark  = Math.max(0, c - 0x101020);
+  const cSide  = Math.max(0, c - 0x181820);
+
+  // Top face
+  g.fillStyle(cLight, 1);
+  g.beginPath();
+  g.moveTo(sx, sy - TH/2 - h);
+  g.lineTo(sx + TW/2, sy - h);
+  g.lineTo(sx, sy + TH/2 - h);
+  g.lineTo(sx - TW/2, sy - h);
+  g.closePath();
+  g.fill();
+
+  // Left face
+  g.fillStyle(c, 1);
+  g.beginPath();
+  g.moveTo(sx - TW/2, sy - h);
+  g.lineTo(sx, sy + TH/2 - h);
+  g.lineTo(sx, sy + TH/2);
+  g.lineTo(sx - TW/2, sy);
+  g.closePath();
+  g.fill();
+
+  // Right face
+  g.fillStyle(cSide, 1);
+  g.beginPath();
+  g.moveTo(sx + TW/2, sy - h);
+  g.lineTo(sx, sy + TH/2 - h);
+  g.lineTo(sx, sy + TH/2);
+  g.lineTo(sx + TW/2, sy);
+  g.closePath();
+  g.fill();
+
+  // Window
+  g.fillStyle(0xffdd88, 0.6 + Math.sin(time * 2) * 0.1);
+  g.fillRect(sx - 6, sy - h + 4, 5, 6);
+  g.fillRect(sx + 2, sy - h + 4, 5, 6);
+}
+
+/* ==========================================================================
+   TOWN SCENE
+   ========================================================================== */
+class TownScene extends Phaser.Scene {
+  constructor() { super({ key: 'Town' }); }
+
+  init(data) {
+    this._townId = data.townId || 'it-services';
+    this._startX = data.startX !== undefined ? data.startX : 15;
+    this._startY = data.startY !== undefined ? data.startY : 15;
+  }
+
+  create() {
+    const W = this.scale.width, H = this.scale.height;
+    const player = this.registry.get('player');
+    const ind = INDUSTRIES[this._townId];
+    const industryColor = ind ? Hex2Int(ind.color) : 0x4af0c0;
+
+    // Generate town map
+    this._mapData = generateTownMap(this._townId);
+    this._player = player;
+
+    // Player position (tile)
+    this._px = this._startX;
+    this._py = this._startY;
+    this._renderX = this._px;
+    this._renderY = this._py;
+    this._moveTimer = 0;
+    this._moving = false;
+    this._targetX = this._px;
+    this._targetY = this._py;
+    this._facing = 0; // 0=down,1=up,2=left,3=right
+    this._stepCount = 0;
+
+    // Camera offset
+    this._camX = 0;
+    this._camY = 0;
+    this._camTargetX = 0;
+    this._camTargetY = 0;
+
+    // Create graphics layers
+    this._tileGfx = this.add.graphics();
+    this._objectGfx = this.add.graphics();
+    this._playerGfx = this.add.graphics();
+    this._uiGfx = this.add.graphics();
+
+    // UI text elements
+    this._hudName = this.add.text(26, 18, '', {
+      fontFamily: "'Inter', sans-serif", fontSize: '13px', fontStyle: 'bold',
+      color: player ? player.color : '#4af0c0'
+    }).setDepth(100);
+    this._hudHP = this.add.text(26, 36, '', {
+      fontFamily: "'Inter', sans-serif", fontSize: '11px', color: '#4af0c0'
+    }).setDepth(100);
+    this._hudMP = this.add.text(26, 52, '', {
+      fontFamily: "'Inter', sans-serif", fontSize: '11px', color: '#6366f1'
+    }).setDepth(100);
+    this._hudGold = this.add.text(206, 18, '', {
+      fontFamily: "'Inter', sans-serif", fontSize: '12px', color: '#EAB308'
+    }).setDepth(100).setOrigin(1, 0);
+    this._hudLoc = this.add.text(W/2, 16, ind ? ind.name : this._townId, {
+      fontFamily: "'Inter', sans-serif", fontSize: '14px', color: '#8888a0'
+    }).setDepth(100).setOrigin(0.5, 0);
+    this._hudFrags = this.add.text(W - 16, 16, '', {
+      fontFamily: "'Inter', sans-serif", fontSize: '12px', color: '#4af0c0'
+    }).setDepth(100).setOrigin(1, 0);
+    this._promptText = this.add.text(0, 0, '[E] Interact', {
+      fontFamily: "'Inter', sans-serif", fontSize: '13px', fontStyle: 'bold',
+      color: '#ffdd44',
+      shadow: { color: '#000', blur: 4, fill: true }
+    }).setDepth(100).setVisible(false);
+    this._controlsText = this.add.text(W/2, H - 14, 'Arrow Keys: Move  |  E: Interact  |  I: Inventory  |  Esc: Menu', {
+      fontFamily: "'Inter', sans-serif", fontSize: '11px', color: '#555566', alpha: 0.5
+    }).setDepth(100).setOrigin(0.5, 1);
+
+    // Input
+    this._cursors = this.input.keyboard.createCursorKeys();
+    this._keyE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+    this._keyI = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.I);
+    this._keyEsc = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+    this._keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+    this._keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+    this._keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+    this._keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+    this._keySpace = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    this._moveDelay = 0;
+
+    // Interaction prompt gfx
+    this._promptGfx = this.add.graphics().setDepth(99);
+
+    // Click-to-interact: clicking on the game world triggers interaction with nearby objects
+    this.input.on('pointerdown', (pointer) => {
+      if (!this.scene.isActive('Town')) return;
+      const interactable = this._getInteractable();
+      if (interactable) {
+        this._handleInteraction(interactable);
+      }
+    });
+
+    // Building label text objects (positioned each frame)
+    this._buildingLabels = [];
+    const labelStyle = { fontFamily: "'Inter', sans-serif", fontSize: '11px', color: '#e8e8ec', shadow: { color: '#000', blur: 3, fill: true } };
+    this._mapData.objects.forEach(obj => {
+      let labelText = '';
+      let labelColor = '#e8e8ec';
+      switch (obj.type) {
+        case 'shop':    labelText = '\u{1F6D2} Store';   labelColor = '#4af0c0'; break;
+        case 'inn':     labelText = '\u{1F3E0} Inn';     labelColor = '#F59E0B'; break;
+        case 'weapon':  labelText = '\u2694\uFE0F Weapons'; labelColor = '#ff6680'; break;
+        case 'archive': labelText = '\u{1F4DA} Archive'; labelColor = '#6366f1'; break;
+        case 'guardian': labelText = '\u2B1F Guardian'; labelColor = '#FFD700'; break;
+        case 'exit':    labelText = '\u25B6 Exit';       labelColor = '#4af0c0'; break;
+        case 'npc': if (obj.npcData) { labelText = obj.npcData.name; labelColor = obj.npcData.color || '#aaaacc'; } break;
+      }
+      if (labelText) {
+        const t = this.add.text(0, 0, labelText, { ...labelStyle, color: labelColor })
+          .setOrigin(0.5, 1).setDepth(98).setVisible(false);
+        t._mapObj = obj;
+        // Make building/NPC labels clickable for direct interaction
+        if (['shop','inn','weapon','archive','guardian','npc','exit'].includes(obj.type)) {
+          t.setInteractive({ cursor: 'pointer' })
+            .on('pointerdown', () => {
+              if (!this.scene.isActive('Town')) return;
+              this._handleInteraction(obj);
+            });
+        }
+        this._buildingLabels.push(t);
+      }
+    });
+
+    // Overworld town labels (created per-object)
+    this._townLabels = [];
+
+    this.cameras.main.fadeIn(400, 10, 14, 26);
+
+    // Update camera immediately
+    this._updateCameraImmediate();
+  }
+
+  _updateCameraImmediate() {
+    const W = this.scale.width, H = this.scale.height;
+    const pos = tileToScreen(this._px, this._py, 0, 0);
+    this._camX = pos.x - W/2;
+    this._camY = pos.y - H/3;
+    this._camTargetX = this._camX;
+    this._camTargetY = this._camY;
+  }
+
+  _tryMove(dx, dy) {
+    const nx = this._px + dx, ny = this._py + dy;
+    const map = this._mapData;
+    if (nx < 0 || ny < 0 || nx >= map.width || ny >= map.height) return false;
+    if (BLOCKED_TILES.has(map.tiles[ny][nx])) return false;
+    // Check objects blocking
+    const obj = map.objects.find(o => o.x === nx && o.y === ny);
+    if (obj && ['shop', 'inn', 'weapon', 'archive', 'guardian'].includes(obj.type)) return false;
+    this._targetX = nx;
+    this._targetY = ny;
+    this._moving = true;
+    this._moveTimer = 0;
+    return true;
+  }
+
+  _getInteractable() {
+    const map = this._mapData;
+    // Check current tile and 1-tile adjacent first
+    const nearDirs = [
+      [0, 0], [0, -1], [0, 1], [-1, 0], [1, 0]
+    ];
+    for (const [dx, dy] of nearDirs) {
+      const tx = this._px + dx, ty = this._py + dy;
+      const obj = map.objects.find(o => o.x === tx && o.y === ty);
+      if (obj) return obj;
+    }
+    // Then check 2-tile radius for buildings (shops, inn, weapon, archive)
+    const farDirs = [
+      [-1, -1], [-1, 1], [1, -1], [1, 1],
+      [0, -2], [0, 2], [-2, 0], [2, 0]
+    ];
+    for (const [dx, dy] of farDirs) {
+      const tx = this._px + dx, ty = this._py + dy;
+      const obj = map.objects.find(o => o.x === tx && o.y === ty);
+      if (obj && ['shop', 'inn', 'weapon', 'archive', 'exit'].includes(obj.type)) return obj;
+    }
+    return null;
+  }
+
+  _getObjectAtPos() {
+    return this._mapData.objects.find(o => o.x === this._px && o.y === this._py) || null;
+  }
+
+  _handleInteraction(obj) {
+    const player = this._player;
+    Audio.uiClick();
+    switch (obj.type) {
+      case 'npc':
+      case 'guardian': {
+        const isGuardian = obj.type === 'guardian';
+        if (isGuardian) {
+          const ind = INDUSTRIES[obj.industryKey];
+          if (!ind) break;
+          const allRead = ind.insights.every(ins => player.insightsRead.includes(ins.id));
+          if (allRead && !player.cognitiveFragments.includes(obj.industryKey)) {
+            player.cognitiveFragments.push(obj.industryKey);
+            if (!player.completedTowns.includes(obj.industryKey)) player.completedTowns.push(obj.industryKey);
+            Audio.fragmentCollect();
+            this.scene.launch('Dialog', {
+              name: 'Town Guardian', color: '#FFD700',
+              dialogue: [...ind.guardianDialogue, '✦ Cognitive Fragment Acquired! ✦'],
+              parentScene: 'Town'
+            });
+          } else if (allRead) {
+            this.scene.launch('Dialog', {
+              name: 'Town Guardian', color: '#FFD700',
+              dialogue: ['You already carry this town\'s fragment. Safe travels!'],
+              parentScene: 'Town'
+            });
+          } else {
+            const remaining = ind.insights.filter(ins => !player.insightsRead.includes(ins.id)).length;
+            this.scene.launch('Dialog', {
+              name: 'Town Guardian', color: '#FFD700',
+              dialogue: [`Still ${remaining} insight${remaining > 1 ? 's' : ''} left to read.`, 'Visit the Knowledge Archive to learn more.'],
+              parentScene: 'Town'
+            });
+          }
+        } else {
+          const npc = obj.npcData;
+          this.scene.launch('Dialog', {
+            name: npc ? npc.name : 'Villager',
+            color: npc ? npc.color : '#aaaacc',
+            dialogue: npc ? npc.dialogue : ['...'],
+            parentScene: 'Town'
+          });
+        }
+        this.scene.pause('Town');
+        break;
+      }
+      case 'knowledge': {
+        const insight = this._findInsight(obj.insightId);
+        if (insight && !player.insightsRead.includes(obj.insightId)) {
+          Audio.insightRead();
+          this.scene.launch('Insight', { insight, player, parentScene: 'Town' });
+          this.scene.pause('Town');
+        } else {
+          this.scene.launch('Dialog', {
+            name: 'Knowledge Point', color: '#4af0c0',
+            dialogue: ['You have already absorbed this insight.'],
+            parentScene: 'Town'
+          });
+          this.scene.pause('Town');
+        }
+        break;
+      }
+      case 'shop':
+        this.scene.launch('Shop', { items: SHOP_GENERAL, title: 'General Store', parentScene: 'Town' });
+        this.scene.pause('Town');
+        break;
+      case 'weapon':
+        this.scene.launch('Shop', { items: SHOP_WEAPON, title: 'Weapon Shop', parentScene: 'Town' });
+        this.scene.pause('Town');
+        break;
+      case 'inn':
+        if (player.gold >= 100) {
+          player.gold -= 100;
+          player.hp = player.maxHp;
+          player.mp = player.maxMp;
+          Audio.heal();
+          this.scene.launch('Dialog', {
+            name: 'Innkeeper', color: '#F59E0B',
+            dialogue: ['Welcome! Rest well... (-100g)', 'HP and MP fully restored!'],
+            parentScene: 'Town'
+          });
+        } else {
+          this.scene.launch('Dialog', {
+            name: 'Innkeeper', color: '#F59E0B',
+            dialogue: ['Rest costs 100 gold. Come back when you have enough!'],
+            parentScene: 'Town'
+          });
+        }
+        this.scene.pause('Town');
+        break;
+      case 'archive':
+        this.scene.launch('Dialog', {
+          name: 'Knowledge Archive', color: '#4af0c0',
+          dialogue: ['Welcome to the Knowledge Archive.', 'Seek the glowing orbs throughout this town to learn industry insights.', 'Knowledge gives you power — literally!'],
+          parentScene: 'Town'
+        });
+        this.scene.pause('Town');
+        break;
+      case 'exit':
+        this._exitToOverworld();
+        break;
     }
   }
 
-  images.forEach(id => {
-    const img = document.getElementById(id);
-    if (img.complete && img.naturalWidth > 0) {
-      checkReady();
-    } else {
-      img.onload = checkReady;
-      img.onerror = checkReady;
+  _findInsight(insightId) {
+    for (const ind of Object.values(INDUSTRIES)) {
+      const ins = ind.insights.find(i => i.id === insightId);
+      if (ins) return ins;
     }
+    return null;
+  }
+
+  _exitToOverworld() {
+    Audio.mapTravel();
+    this.cameras.main.fadeOut(400, 10, 14, 26);
+    this.cameras.main.once('camerafadeoutcomplete', () => {
+      this.scene.start('Overworld');
+    });
+  }
+
+  update(time, delta) {
+    if (!this.scene.isActive('Town')) return;
+    const dt = delta / 1000;
+    const player = this._player;
+
+    // Moving animation
+    if (this._moving) {
+      this._moveTimer += dt * 8; // speed
+      const t = Math.min(1, this._moveTimer);
+      this._renderX = this._px + (this._targetX - this._px) * t;
+      this._renderY = this._py + (this._targetY - this._py) * t;
+      if (this._moveTimer >= 1) {
+        this._px = this._targetX;
+        this._py = this._targetY;
+        this._renderX = this._px;
+        this._renderY = this._py;
+        this._moving = false;
+
+        // Check step-on triggers — exit when reaching edge of town (within 2 tiles of wall)
+        const atObj = this._getObjectAtPos();
+        if (atObj && atObj.type === 'exit') {
+          this._exitToOverworld();
+        } else {
+          const map = this._mapData;
+          const nearEdge = this._px <= 2 || this._px >= map.width - 3 || this._py <= 2 || this._py >= map.height - 3;
+          if (nearEdge) {
+            this._exitToOverworld();
+          }
+        }
+      }
+    }
+
+    // Camera lerp
+    const W = this.scale.width, H = this.scale.height;
+    const pos = tileToScreen(this._renderX, this._renderY, 0, 0);
+    this._camTargetX = pos.x - W/2;
+    this._camTargetY = pos.y - H/3;
+    this._camX += (this._camTargetX - this._camX) * 0.1;
+    this._camY += (this._camTargetY - this._camY) * 0.1;
+
+    // Input
+    this._moveDelay -= dt;
+    if (!this._moving && this._moveDelay <= 0) {
+      let moved = false;
+      if (this._cursors.up.isDown || this._keyW.isDown) {
+        moved = this._tryMove(-1, -1); this._facing = 1;
+      } else if (this._cursors.down.isDown || this._keyS.isDown) {
+        moved = this._tryMove(1, 1); this._facing = 0;
+      } else if (this._cursors.left.isDown || this._keyA.isDown) {
+        moved = this._tryMove(-1, 1); this._facing = 2;
+      } else if (this._cursors.right.isDown || this._keyD.isDown) {
+        moved = this._tryMove(1, -1); this._facing = 3;
+      }
+      if (moved) {
+        this._moveDelay = 0.08;
+        this._stepCount++;
+        if (this._stepCount % 3 === 0) Audio.footstep();
+      }
+    }
+
+    // Interaction
+    if (Phaser.Input.Keyboard.JustDown(this._keyE) || Phaser.Input.Keyboard.JustDown(this._keySpace)) {
+      const interactable = this._getInteractable();
+      if (interactable) this._handleInteraction(interactable);
+    }
+
+    // Inventory
+    if (Phaser.Input.Keyboard.JustDown(this._keyI)) {
+      Audio.uiClick();
+      this.scene.launch('Inventory', { parentScene: 'Town' });
+      this.scene.pause('Town');
+    }
+
+    // Render
+    this._render(time / 1000);
+    this._renderHUD(player);
+  }
+
+  _render(time) {
+    const W = this.scale.width, H = this.scale.height;
+    const map = this._mapData;
+    const player = this._player;
+    const ind = INDUSTRIES[this._townId];
+    const industryColor = ind ? Hex2Int(ind.color) : 0x4af0c0;
+
+    // Clear graphics
+    this._tileGfx.clear();
+    this._objectGfx.clear();
+    this._playerGfx.clear();
+    this._promptGfx.clear();
+
+    // Draw tiles
+    for (let ty = 0; ty < map.height; ty++) {
+      for (let tx = 0; tx < map.width; tx++) {
+        const screen = tileToScreen(tx, ty, W/2 - this._camX, H/3 - this._camY);
+        if (screen.x < -80 || screen.x > W + 80 || screen.y < -80 || screen.y > H + 80) continue;
+        const tileType = map.tiles[ty][tx];
+        drawIsoTile(this._tileGfx, screen.x, screen.y, tileType);
+      }
+    }
+
+    // Draw objects and player (sorted by y for depth)
+    const allDrawables = [
+      ...map.objects.map(o => ({ ...o, _type: 'obj' })),
+      { x: this._renderX, y: this._renderY, _type: 'player' }
+    ].sort((a, b) => (a.y + a.x * 0.001) - (b.y + b.x * 0.001));
+
+    let interactable = this._getInteractable();
+
+    allDrawables.forEach(drawable => {
+      if (drawable._type === 'player') {
+        this._drawPlayer(this._objectGfx, this._renderX, this._renderY, time);
+        return;
+      }
+      const obj = drawable;
+      const screen = tileToScreen(obj.x, obj.y, W/2 - this._camX, H/3 - this._camY);
+      if (screen.x < -80 || screen.x > W + 80 || screen.y < -80 || screen.y > H + 80) return;
+
+      const isInteract = interactable && interactable.x === obj.x && interactable.y === obj.y;
+      if (isInteract) {
+        // Glow
+        this._promptGfx.fillStyle(0xffdd44, 0.15);
+        this._promptGfx.fillCircle(screen.x, screen.y, 28);
+      }
+
+      switch (obj.type) {
+        case 'shop':
+          drawIsoBuilding(this._objectGfx, screen.x, screen.y, 0x2a7a3a, 32, 'Store', time);
+          this._drawLabel(this._objectGfx, screen.x, screen.y - 44, '🏪 Store', 0x4af0c0);
+          break;
+        case 'inn':
+          drawIsoBuilding(this._objectGfx, screen.x, screen.y, 0x7a4a1a, 28, 'Inn', time);
+          this._drawLabel(this._objectGfx, screen.x, screen.y - 40, '🏠 Inn', 0xF59E0B);
+          break;
+        case 'weapon':
+          drawIsoBuilding(this._objectGfx, screen.x, screen.y, 0x7a1a1a, 32, 'Weapons', time);
+          this._drawLabel(this._objectGfx, screen.x, screen.y - 44, '⚔️ Weapons', 0xff4466);
+          break;
+        case 'archive':
+          drawIsoBuilding(this._objectGfx, screen.x, screen.y, 0x1a3a7a, 36, 'Archive', time);
+          this._drawLabel(this._objectGfx, screen.x, screen.y - 48, '📚 Archive', 0x4af0c0);
+          break;
+        case 'guardian': {
+          const pulse = 0.7 + Math.sin(time * 2) * 0.3;
+          this._objectGfx.fillStyle(industryColor, pulse * 0.4);
+          this._objectGfx.fillCircle(screen.x, screen.y, 20);
+          this._objectGfx.fillStyle(industryColor, pulse);
+          this._objectGfx.fillCircle(screen.x, screen.y, 10);
+          this._objectGfx.fillStyle(0xFFD700, 0.8);
+          this._objectGfx.fillCircle(screen.x, screen.y - 16, 8);
+          this._objectGfx.fillStyle(0xffdd88, 1);
+          this._objectGfx.fillRect(screen.x - 4, screen.y - 8, 8, 14);
+          this._drawLabel(this._objectGfx, screen.x, screen.y - 30, '⬟ Guardian', 0xFFD700);
+          break;
+        }
+        case 'knowledge': {
+          const alreadyRead = player && player.insightsRead.includes(obj.insightId);
+          const kPulse = alreadyRead ? 0.3 : (0.5 + Math.sin(time * 3 + obj.x) * 0.3);
+          const kColor = alreadyRead ? 0x444466 : 0x4af0c0;
+          this._objectGfx.fillStyle(kColor, kPulse * 0.5);
+          this._objectGfx.fillCircle(screen.x, screen.y - 10, 16);
+          this._objectGfx.fillStyle(kColor, kPulse);
+          this._objectGfx.fillCircle(screen.x, screen.y - 10, 7);
+          if (!alreadyRead) {
+            this._objectGfx.lineStyle(1, kColor, kPulse * 0.6);
+            this._objectGfx.strokeCircle(screen.x, screen.y - 10, 12);
+          }
+          break;
+        }
+        case 'npc':
+          this._drawNPC(this._objectGfx, screen.x, screen.y, obj.npcData, time);
+          break;
+        case 'exit': {
+          const ePulse = 0.5 + Math.sin(time * 2) * 0.3;
+          this._objectGfx.fillStyle(0x4af0c0, ePulse * 0.3);
+          this._objectGfx.fillRect(screen.x - 20, screen.y - 6, 40, 14);
+          this._objectGfx.lineStyle(2, 0x4af0c0, ePulse);
+          this._objectGfx.strokeRect(screen.x - 20, screen.y - 6, 40, 14);
+          this._drawLabel(this._objectGfx, screen.x, screen.y - 18, '▶ Exit', 0x4af0c0);
+          break;
+        }
+      }
+    });
+
+    // Interaction prompt
+    if (interactable) {
+      const screen = tileToScreen(interactable.x, interactable.y, W/2 - this._camX, H/3 - this._camY);
+      const promptPulse = 0.7 + Math.sin(time * 4) * 0.3;
+      // Draw [E] prompt
+      this._promptGfx.fillStyle(0x000000, 0.6);
+      this._promptGfx.fillRoundedRect(screen.x - 22, screen.y - 52, 44, 20, 4);
+      this._promptGfx.lineStyle(1, 0xffdd44, promptPulse);
+      this._promptGfx.strokeRoundedRect(screen.x - 22, screen.y - 52, 44, 20, 4);
+      this._promptText.setPosition(screen.x, screen.y - 42).setVisible(true);
+    } else {
+      this._promptText.setVisible(false);
+    }
+
+    // Update building labels
+    this._updateBuildingLabels();
+  }
+
+  _drawLabel(g, x, y, label, color) {
+    // Actual labels are Phaser Text objects updated in _updateBuildingLabels()
+  }
+
+  _updateBuildingLabels() {
+    if (!this._buildingLabels) return;
+    const W = this.scale.width, H = this.scale.height;
+    for (const t of this._buildingLabels) {
+      const obj = t._mapObj;
+      const s = tileToScreen(obj.x, obj.y, W/2 - this._camX, H/3 - this._camY);
+      // Only show if on-screen
+      if (s.x > -60 && s.x < W + 60 && s.y > -60 && s.y < H + 60) {
+        t.setPosition(s.x, s.y - 52).setVisible(true);
+      } else {
+        t.setVisible(false);
+      }
+    }
+  }
+
+  _drawPlayer(g, tx, ty, time) {
+    const W = this.scale.width, H = this.scale.height;
+    const screen = tileToScreen(tx, ty, W/2 - this._camX, H/3 - this._camY);
+    const player = this._player;
+    const color = player ? Hex2Int(player.color) : 0x4af0c0;
+    const bob = Math.sin(time * 3) * 2;
+
+    // Shadow
+    g.fillStyle(0x000000, 0.3);
+    g.fillEllipse(screen.x, screen.y + 14, 24, 8);
+
+    // Body
+    g.fillStyle(color, 1);
+    g.fillRect(screen.x - 8, screen.y - 16 + bob, 16, 20);
+    g.fillStyle(0xffffff, 0.1);
+    g.fillRect(screen.x - 8, screen.y - 16 + bob, 16, 5);
+
+    // Head
+    g.fillStyle(0xe8c8a0, 1);
+    g.fillCircle(screen.x, screen.y - 24 + bob, 9);
+
+    // Hair
+    g.fillStyle(0x3a2010, 1);
+    g.fillCircle(screen.x, screen.y - 28 + bob, 9);
+    g.fillStyle(0xe8c8a0, 1);
+    g.fillRect(screen.x - 9, screen.y - 24 + bob, 18, 9);
+
+    // Eyes
+    g.fillStyle(0x333333, 1);
+    g.fillRect(screen.x - 3, screen.y - 24 + bob, 2, 2);
+    g.fillRect(screen.x + 1, screen.y - 24 + bob, 2, 2);
+
+    // Glow halo (industry color)
+    g.fillStyle(color, 0.3);
+    g.fillCircle(screen.x, screen.y - 24 + bob, 14);
+    g.fillStyle(color, 0.15);
+    g.fillCircle(screen.x, screen.y, 20);
+  }
+
+  _drawNPC(g, sx, sy, npc, time) {
+    const color = npc ? Hex2Int(npc.color || '#8888a0') : 0x8888a0;
+    const bob = Math.sin(time * 1.5 + sx) * 1;
+
+    g.fillStyle(0x000000, 0.2);
+    g.fillEllipse(sx, sy + 12, 20, 6);
+
+    g.fillStyle(color, 0.8);
+    g.fillRect(sx - 6, sy - 12 + bob, 12, 16);
+
+    g.fillStyle(0xe8c8a0, 1);
+    g.fillCircle(sx, sy - 18 + bob, 7);
+    g.fillStyle(0x333, 1);
+    g.fillRect(sx - 2, sy - 19 + bob, 2, 2);
+    g.fillRect(sx + 1, sy - 19 + bob, 2, 2);
+  }
+
+  _renderHUD(player) {
+    if (!player) return;
+    const W = this.scale.width;
+    const H = this.scale.height;
+
+    // Update HUD text
+    this._hudName.setText(`${player.name}  Lv.${player.level}`);
+    this._hudName.setColor(player.color);
+    this._hudHP.setText(`HP: ${Math.ceil(player.hp)} / ${player.maxHp}`);
+    this._hudMP.setText(`MP: ${Math.ceil(player.mp)} / ${player.maxMp}`);
+    this._hudGold.setText(`${player.gold}g`);
+    this._hudFrags.setText(`◆ ${player.cognitiveFragments.length}/14`);
+
+    // Draw HP/MP bars
+    this._uiGfx.clear();
+    // HUD background
+    this._uiGfx.fillStyle(0x0a0e1a, 0.85);
+    this._uiGfx.lineStyle(1, 0x2a2a4a, 1);
+    this._uiGfx.strokeRect(8, 8, 220, 70);
+    this._uiGfx.fillRect(8, 8, 220, 70);
+    this._uiGfx.fillStyle(Hex2Int(player.color), 0.15);
+    this._uiGfx.fillRect(8, 8, 220, 4);
+
+    // HP bar
+    drawBar(this._uiGfx, 20, 44, 190, 10, player.hp, player.maxHp, 0x4af0c0, 0x0a2020);
+    // MP bar
+    drawBar(this._uiGfx, 20, 58, 190, 10, player.mp, player.maxMp, 0x6366f1, 0x0a0a20);
+
+    // Minimap (bottom-right)
+    const map = this._mapData;
+    const mmSize = 90;
+    const mmX = W - mmSize - 12;
+    const mmY = H - mmSize - 28;
+    const cellW = mmSize / map.width;
+    const cellH = mmSize / map.height;
+
+    // Background
+    this._uiGfx.fillStyle(0x0a0e1a, 0.85);
+    this._uiGfx.fillRect(mmX - 2, mmY - 2, mmSize + 4, mmSize + 4);
+    this._uiGfx.lineStyle(1, 0x2a2a4a, 1);
+    this._uiGfx.strokeRect(mmX - 2, mmY - 2, mmSize + 4, mmSize + 4);
+
+    // Draw terrain
+    for (let ty = 0; ty < map.height; ty++) {
+      for (let tx = 0; tx < map.width; tx++) {
+        const tile = map.tiles[ty][tx];
+        let color = 0x1a1a2e;
+        if (tile === TILE.COBBLE || tile === TILE.ROAD) color = 0x444466;
+        else if (tile === TILE.GRASS) color = 0x1a3a1a;
+        else if (tile === TILE.WATER) color = 0x1a2a4a;
+        else if (tile === TILE.WALL) color = 0x2a2a3a;
+        else if (tile === TILE.STONE) color = 0x222233;
+        this._uiGfx.fillStyle(color, 0.8);
+        this._uiGfx.fillRect(mmX + tx * cellW, mmY + ty * cellH, cellW + 0.5, cellH + 0.5);
+      }
+    }
+
+    // Draw objects on minimap
+    map.objects.forEach(obj => {
+      let dotColor = 0;
+      switch (obj.type) {
+        case 'shop':     dotColor = 0x4af0c0; break;
+        case 'inn':      dotColor = 0xF59E0B; break;
+        case 'weapon':   dotColor = 0xff4466; break;
+        case 'archive':  dotColor = 0x6366f1; break;
+        case 'exit':     dotColor = 0x00ff88; break;
+        case 'npc':      dotColor = 0xaaaacc; break;
+        case 'guardian': dotColor = 0xFFD700; break;
+        case 'knowledge': dotColor = 0x4af0c0; break;
+        default: return;
+      }
+      this._uiGfx.fillStyle(dotColor, 0.9);
+      const dotSize = ['shop','inn','weapon','archive','exit'].includes(obj.type) ? 3 : 2;
+      this._uiGfx.fillRect(mmX + obj.x * cellW - dotSize/2, mmY + obj.y * cellH - dotSize/2, dotSize, dotSize);
+    });
+
+    // Player dot (blinking)
+    const blink = Math.sin(Date.now() / 200) > 0;
+    if (blink) {
+      this._uiGfx.fillStyle(0xffffff, 1);
+      this._uiGfx.fillRect(mmX + this._px * cellW - 2, mmY + this._py * cellH - 2, 4, 4);
+    }
+    this._uiGfx.fillStyle(Hex2Int(player.color), 0.8);
+    this._uiGfx.fillRect(mmX + this._px * cellW - 1.5, mmY + this._py * cellH - 1.5, 3, 3);
+  }
+}
+
+/* ==========================================================================
+   OVERWORLD SCENE
+   ========================================================================== */
+class OverworldScene extends Phaser.Scene {
+  constructor() { super({ key: 'Overworld' }); }
+
+  create() {
+    const W = this.scale.width, H = this.scale.height;
+    const player = this.registry.get('player');
+
+    this._mapData = OVERWORLD_MAP;
+    this._player = player;
+
+    // Start near player's current town
+    const startTown = player ? player.currentTown : 'it-services';
+    const townPos = this._mapData.townPositions[startTown] || { x: 30, y: 30 };
+    this._px = townPos.x;
+    this._py = townPos.y + 1;
+    this._renderX = this._px;
+    this._renderY = this._py;
+    this._targetX = this._px;
+    this._targetY = this._py;
+    this._moving = false;
+    this._moveTimer = 0;
+    this._moveDelay = 0;
+    this._encounterCooldown = 3;
+    this._showEncounterAlert = false;
+    this._alertTimer = 0;
+    this._stepCount = 0;
+
+    // Camera
+    this._camX = 0; this._camY = 0;
+    this._camTargetX = 0; this._camTargetY = 0;
+
+    // Graphics layers
+    this._tileGfx = this.add.graphics();
+    this._objectGfx = this.add.graphics();
+    this._playerGfx = this.add.graphics();
+    this._uiGfx = this.add.graphics();
+    this._alertGfx = this.add.graphics();
+
+    // HUD elements
+    this._hudName = this.add.text(26, 18, '', {
+      fontFamily: "'Inter', sans-serif", fontSize: '13px', fontStyle: 'bold',
+      color: player ? player.color : '#4af0c0'
+    }).setDepth(100);
+    this._hudHP = this.add.text(26, 36, '', { fontFamily: "'Inter', sans-serif", fontSize: '11px', color: '#4af0c0' }).setDepth(100);
+    this._hudMP = this.add.text(26, 52, '', { fontFamily: "'Inter', sans-serif", fontSize: '11px', color: '#6366f1' }).setDepth(100);
+    this._hudGold = this.add.text(206, 18, '', { fontFamily: "'Inter', sans-serif", fontSize: '12px', color: '#EAB308' }).setDepth(100).setOrigin(1, 0);
+    this._hudLoc = this.add.text(W/2, 16, 'Overworld', { fontFamily: "'Inter', sans-serif", fontSize: '14px', color: '#8888a0' }).setDepth(100).setOrigin(0.5, 0);
+    this._hudFrags = this.add.text(W - 16, 16, '', { fontFamily: "'Inter', sans-serif", fontSize: '12px', color: '#4af0c0' }).setDepth(100).setOrigin(1, 0);
+    this._promptText = this.add.text(0, 0, '[E] Enter', {
+      fontFamily: "'Inter', sans-serif", fontSize: '13px', fontStyle: 'bold',
+      color: '#ffdd44', shadow: { color: '#000', blur: 4, fill: true }
+    }).setDepth(100).setVisible(false);
+    this._controlsText = this.add.text(W/2, H - 14, 'Arrow Keys: Move  |  E: Enter Town  |  I: Inventory', {
+      fontFamily: "'Inter', sans-serif", fontSize: '11px', color: '#555566'
+    }).setDepth(100).setOrigin(0.5, 1);
+    this._alertText = this.add.text(W/2, H/2, '!', {
+      fontFamily: "'Cormorant Garamond', serif", fontSize: '80px', fontStyle: 'bold',
+      color: '#ff4466', shadow: { color: '#ff0000', blur: 20, fill: true }
+    }).setDepth(200).setOrigin(0.5).setVisible(false);
+
+    // Input
+    this._cursors = this.input.keyboard.createCursorKeys();
+    this._keyE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+    this._keyI = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.I);
+    this._keySpace = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    this._keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+    this._keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+    this._keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+    this._keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+
+    this._promptGfx = this.add.graphics().setDepth(99);
+
+    // Town name label texts (positioned each render frame)
+    this._townLabelTexts = [];
+    this._mapData.objects.forEach(obj => {
+      if (obj.type === 'town-entrance') {
+        const ind = INDUSTRIES[obj.townId];
+        if (ind) {
+          const shortName = ind.name.split('/')[0].trim();
+          const t = this.add.text(0, 0, shortName, {
+            fontFamily: "'Inter', sans-serif", fontSize: '10px', fontStyle: 'bold',
+            color: ind.color || '#4af0c0',
+            shadow: { color: '#000', blur: 3, fill: true }
+          }).setOrigin(0.5, 1).setDepth(98).setVisible(false);
+          t._mapObj = obj;
+          t._indColor = ind.color || '#4af0c0';
+          this._townLabelTexts.push(t);
+        }
+      }
+    });
+
+    this._updateCameraImmediate();
+    this.cameras.main.fadeIn(400, 10, 14, 26);
+  }
+
+  _updateCameraImmediate() {
+    const W = this.scale.width, H = this.scale.height;
+    const pos = tileToScreen(this._px, this._py, 0, 0);
+    this._camX = pos.x - W/2;
+    this._camY = pos.y - H/3;
+    this._camTargetX = this._camX;
+    this._camTargetY = this._camY;
+  }
+
+  _tryMove(dx, dy) {
+    const nx = this._px + dx, ny = this._py + dy;
+    const map = this._mapData;
+    if (nx < 0 || ny < 0 || nx >= map.width || ny >= map.height) return false;
+    const tile = map.tiles[ny][nx];
+    if (tile === TILE.WATER || tile === TILE.MOUNTAIN) return false;
+    this._targetX = nx; this._targetY = ny;
+    this._moving = true; this._moveTimer = 0;
+    return true;
+  }
+
+  _getObjectAtPos() {
+    return this._mapData.objects.find(o => o.x === this._px && o.y === this._py) || null;
+  }
+
+  _getInteractable() {
+    const dirs = [[0,-1],[0,1],[-1,0],[1,0],[0,0]];
+    for (const [dx, dy] of dirs) {
+      const obj = this._mapData.objects.find(o => o.x === this._px + dx && o.y === this._py + dy);
+      if (obj && ['town-entrance','campfire','signpost'].includes(obj.type)) return obj;
+    }
+    return null;
+  }
+
+  _enterTown(townId) {
+    const player = this._player;
+    if (!player) return;
+    Audio.mapTravel();
+    player.currentTown = townId;
+    if (!player.unlockedTowns.includes(townId)) player.unlockedTowns.push(townId);
+    this.cameras.main.fadeOut(400, 10, 14, 26);
+    this.cameras.main.once('camerafadeoutcomplete', () => {
+      this.scene.start('Town', { townId, startX: 15, startY: 15 });
+    });
+  }
+
+  _triggerEncounter() {
+    const player = this._player;
+    // Find nearest town for region
+    const pPos = { x: this._px, y: this._py };
+    let nearestTown = 'it-services', nearestDist = Infinity;
+    for (const [key, pos] of Object.entries(this._mapData.townPositions)) {
+      const d = Math.abs(pos.x - pPos.x) + Math.abs(pos.y - pPos.y);
+      if (d < nearestDist) { nearestDist = d; nearestTown = key; }
+    }
+    const region = getRegionForTown(nearestTown);
+    const pool = getEnemiesForRegion(region);
+    const enemyId = pool[Math.floor(Math.random() * pool.length)];
+    const enemy = ENEMIES[enemyId];
+    if (!enemy) return;
+
+    this.cameras.main.fadeOut(400, 10, 14, 26);
+    this.cameras.main.once('camerafadeoutcomplete', () => {
+      this.scene.start('Battle', {
+        enemy: { ...enemy, id: enemyId, currentHp: enemy.maxHp },
+        region,
+        returnScene: 'Overworld'
+      });
+    });
+  }
+
+  update(time, delta) {
+    if (!this.scene.isActive('Overworld')) return;
+    const dt = delta / 1000;
+    const player = this._player;
+
+    // Encounter alert animation
+    if (this._showEncounterAlert) {
+      this._alertTimer -= dt;
+      this._alertText.setVisible(true);
+      this._alertText.setAlpha(Math.abs(Math.sin(this._alertTimer * 8)));
+      if (this._alertTimer <= 0) {
+        this._showEncounterAlert = false;
+        this._alertText.setVisible(false);
+        this._triggerEncounter();
+      }
+      this._renderOW(time / 1000);
+      this._renderHUD(player);
+      return;
+    }
+
+    // Movement
+    if (this._moving) {
+      this._moveTimer += dt * 7;
+      const t = Math.min(1, this._moveTimer);
+      this._renderX = this._px + (this._targetX - this._px) * t;
+      this._renderY = this._py + (this._targetY - this._py) * t;
+      if (this._moveTimer >= 1) {
+        this._px = this._targetX; this._py = this._targetY;
+        this._renderX = this._px; this._renderY = this._py;
+        this._moving = false;
+
+        // Check for auto-trigger on town entrance
+        const atObj = this._getObjectAtPos();
+        if (atObj && atObj.type === 'town-entrance') {
+          // Show prompt, don't auto-enter
+        }
+
+        // Random encounter check
+        this._encounterCooldown -= 1;
+        if (this._encounterCooldown <= 0) {
+          const tile = this._mapData.tiles[this._py] && this._mapData.tiles[this._py][this._px];
+          const rate = getEncounterRate(tile || TILE.GRASS);
+          if (Math.random() < rate) {
+            this._showEncounterAlert = true;
+            this._alertTimer = 0.6;
+            this._encounterCooldown = 5;
+            Audio.encounter();
+          }
+        }
+      }
+    }
+
+    // Camera lerp
+    const W = this.scale.width, H = this.scale.height;
+    const pos = tileToScreen(this._renderX, this._renderY, 0, 0);
+    this._camTargetX = pos.x - W/2;
+    this._camTargetY = pos.y - H/3;
+    this._camX += (this._camTargetX - this._camX) * 0.1;
+    this._camY += (this._camTargetY - this._camY) * 0.1;
+
+    // Input
+    this._moveDelay -= dt;
+    if (!this._moving && this._moveDelay <= 0) {
+      let moved = false;
+      if (this._cursors.up.isDown || this._keyW.isDown)    { moved = this._tryMove(-1, -1); }
+      else if (this._cursors.down.isDown || this._keyS.isDown)  { moved = this._tryMove(1, 1); }
+      else if (this._cursors.left.isDown || this._keyA.isDown)  { moved = this._tryMove(-1, 1); }
+      else if (this._cursors.right.isDown || this._keyD.isDown) { moved = this._tryMove(1, -1); }
+      if (moved) {
+        this._moveDelay = 0.1;
+        this._stepCount++;
+        if (this._stepCount % 4 === 0) Audio.footstep();
+      }
+    }
+
+    // Interaction
+    if (Phaser.Input.Keyboard.JustDown(this._keyE) || Phaser.Input.Keyboard.JustDown(this._keySpace)) {
+      const interactable = this._getInteractable();
+      if (interactable) {
+        if (interactable.type === 'town-entrance') {
+          this._enterTown(interactable.townId);
+        } else if (interactable.type === 'campfire') {
+          player.hp = player.maxHp;
+          player.mp = player.maxMp;
+          Audio.heal();
+          this.scene.launch('Dialog', {
+            name: 'Campfire', color: '#ffaa44',
+            dialogue: ['You rest by the warm campfire...', 'HP and MP fully restored!'],
+            parentScene: 'Overworld'
+          });
+          this.scene.pause('Overworld');
+        } else if (interactable.type === 'signpost') {
+          const indName = INDUSTRIES[interactable.townId] ? INDUSTRIES[interactable.townId].name : interactable.townId;
+          this.scene.launch('Dialog', {
+            name: 'Signpost', color: '#8a6a3a',
+            dialogue: [`→ ${indName}`],
+            parentScene: 'Overworld'
+          });
+          this.scene.pause('Overworld');
+        }
+      }
+    }
+
+    // Inventory
+    if (Phaser.Input.Keyboard.JustDown(this._keyI)) {
+      Audio.uiClick();
+      this.scene.launch('Inventory', { parentScene: 'Overworld' });
+      this.scene.pause('Overworld');
+    }
+
+    this._renderOW(time / 1000);
+    this._renderHUD(player);
+  }
+
+  _renderOW(time) {
+    const W = this.scale.width, H = this.scale.height;
+    const map = this._mapData;
+    const player = this._player;
+
+    this._tileGfx.clear();
+    this._objectGfx.clear();
+    this._playerGfx.clear();
+    this._promptGfx.clear();
+
+    // Draw tiles
+    for (let ty = 0; ty < map.height; ty++) {
+      for (let tx = 0; tx < map.width; tx++) {
+        const screen = tileToScreen(tx, ty, W/2 - this._camX, H/3 - this._camY);
+        if (screen.x < -80 || screen.x > W + 80 || screen.y < -80 || screen.y > H + 80) continue;
+        drawIsoTile(this._tileGfx, screen.x, screen.y, map.tiles[ty][tx]);
+      }
+    }
+
+    // Interactable
+    const interactable = this._getInteractable();
+
+    // Objects + player sorted
+    const allDrawables = [
+      ...map.objects.map(o => ({ ...o, _type: 'obj' })),
+      { x: this._renderX, y: this._renderY, _type: 'player' }
+    ].sort((a, b) => (a.y + a.x * 0.001) - (b.y + b.x * 0.001));
+
+    allDrawables.forEach(drawable => {
+      if (drawable._type === 'player') {
+        this._drawPlayerOW(this._objectGfx, this._renderX, this._renderY, time);
+        return;
+      }
+      const obj = drawable;
+      const screen = tileToScreen(obj.x, obj.y, W/2 - this._camX, H/3 - this._camY);
+      if (screen.x < -80 || screen.x > W + 80 || screen.y < -80 || screen.y > H + 80) return;
+
+      if (obj.type === 'town-entrance') {
+        const ind = INDUSTRIES[obj.townId];
+        const indColor = ind ? Hex2Int(ind.color) : 0x4af0c0;
+        const isUnlocked = player && player.unlockedTowns.includes(obj.townId);
+        const isCompleted = player && player.completedTowns.includes(obj.townId);
+        const pulse = 0.6 + Math.sin(time * 2 + obj.x) * 0.3;
+
+        this._objectGfx.fillStyle(indColor, isUnlocked ? pulse * 0.4 : 0.15);
+        this._objectGfx.fillCircle(screen.x, screen.y, 18);
+        this._objectGfx.fillStyle(indColor, isUnlocked ? 0.9 : 0.3);
+        this._objectGfx.fillCircle(screen.x, screen.y, 10);
+        if (isCompleted) {
+          this._objectGfx.lineStyle(2, 0xFFD700, 0.8);
+          this._objectGfx.strokeCircle(screen.x, screen.y, 22);
+        }
+
+        // Town label — draw as part of UI
+        const isNearby = Math.abs(obj.x - this._px) <= 3 && Math.abs(obj.y - this._py) <= 3;
+        if (isNearby && ind) {
+          // Highlight close towns
+          this._objectGfx.lineStyle(2, indColor, 0.6);
+          this._objectGfx.strokeCircle(screen.x, screen.y, 26);
+        }
+
+        if (interactable && interactable.x === obj.x && interactable.y === obj.y) {
+          this._promptGfx.fillStyle(0x000000, 0.6);
+          this._promptGfx.fillRoundedRect(screen.x - 30, screen.y - 52, 60, 20, 4);
+          this._promptGfx.lineStyle(1, 0xffdd44, 0.8);
+          this._promptGfx.strokeRoundedRect(screen.x - 30, screen.y - 52, 60, 20, 4);
+          this._promptText.setPosition(screen.x, screen.y - 42)
+            .setText('[E] Enter ' + (ind ? ind.name.split('/')[0].trim() : ''))
+            .setVisible(true);
+        }
+      } else if (obj.type === 'campfire') {
+        const fp = 0.4 + Math.sin(time * 6 + obj.x) * 0.3;
+        this._objectGfx.fillStyle(0xff7700, fp);
+        this._objectGfx.fillCircle(screen.x, screen.y - 6, 8);
+        this._objectGfx.fillStyle(0xffcc00, fp * 0.8);
+        this._objectGfx.fillCircle(screen.x, screen.y - 8, 5);
+        this._objectGfx.fillStyle(0x3a2a10, 1);
+        this._objectGfx.fillRect(screen.x - 6, screen.y - 4, 12, 6);
+        if (interactable && interactable.x === obj.x && interactable.y === obj.y) {
+          this._promptText.setPosition(screen.x, screen.y - 26).setText('[E] Rest').setVisible(true);
+        }
+      } else if (obj.type === 'signpost') {
+        this._objectGfx.fillStyle(0x8a6a3a, 1);
+        this._objectGfx.fillRect(screen.x - 2, screen.y - 16, 4, 20);
+        this._objectGfx.fillStyle(0xaa8a4a, 1);
+        this._objectGfx.fillRect(screen.x - 12, screen.y - 20, 24, 8);
+      }
+    });
+
+    if (!interactable) this._promptText.setVisible(false);
+
+    // Update town label positions
+    if (this._townLabelTexts) {
+      this._townLabelTexts.forEach(t => {
+        const obj = t._mapObj;
+        const s = tileToScreen(obj.x, obj.y, W/2 - this._camX, H/3 - this._camY);
+        if (s.x > -60 && s.x < W + 60 && s.y > -60 && s.y < H + 60) {
+          t.setPosition(s.x, s.y - 32).setVisible(true);
+        } else {
+          t.setVisible(false);
+        }
+      });
+    }
+
+    // Minimap
+    this._drawMinimap(time);
+  }
+
+  _drawPlayerOW(g, tx, ty, time) {
+    const W = this.scale.width, H = this.scale.height;
+    const screen = tileToScreen(tx, ty, W/2 - this._camX, H/3 - this._camY);
+    const player = this._player;
+    const color = player ? Hex2Int(player.color) : 0x4af0c0;
+    const bob = Math.sin(time * 3) * 2;
+
+    g.fillStyle(0x000000, 0.3);
+    g.fillEllipse(screen.x, screen.y + 14, 26, 8);
+    g.fillStyle(color, 1);
+    g.fillRect(screen.x - 9, screen.y - 18 + bob, 18, 22);
+    g.fillStyle(0xffffff, 0.1);
+    g.fillRect(screen.x - 9, screen.y - 18 + bob, 18, 6);
+    g.fillStyle(0xe8c8a0, 1);
+    g.fillCircle(screen.x, screen.y - 26 + bob, 10);
+    g.fillStyle(0x3a2010, 1);
+    g.fillCircle(screen.x, screen.y - 30 + bob, 10);
+    g.fillStyle(0xe8c8a0, 1);
+    g.fillRect(screen.x - 10, screen.y - 26 + bob, 20, 10);
+    g.fillStyle(color, 0.25);
+    g.fillCircle(screen.x, screen.y - 18 + bob, 16);
+  }
+
+  _drawMinimap(time) {
+    const W = this.scale.width, H = this.scale.height;
+    const map = this._mapData;
+    const player = this._player;
+    const mmW = 150, mmH = 110;
+    const mmX = W - mmW - 14, mmY = 42;
+    const scaleX = (mmW - 10) / map.width;
+    const scaleY = (mmH - 10) / map.height;
+
+    this._uiGfx.clear();
+    // HUD panel
+    this._uiGfx.fillStyle(0x0a0e1a, 0.85);
+    this._uiGfx.lineStyle(1, 0x2a2a4a, 1);
+    this._uiGfx.strokeRect(8, 8, 220, 70);
+    this._uiGfx.fillRect(8, 8, 220, 70);
+    if (player) {
+      this._uiGfx.fillStyle(Hex2Int(player.color), 0.15);
+      this._uiGfx.fillRect(8, 8, 220, 4);
+      drawBar(this._uiGfx, 20, 44, 190, 10, player.hp, player.maxHp, 0x4af0c0, 0x0a2020);
+      drawBar(this._uiGfx, 20, 58, 190, 10, player.mp, player.maxMp, 0x6366f1, 0x0a0a20);
+    }
+
+    // Minimap
+    this._uiGfx.fillStyle(0x080c18, 0.9);
+    this._uiGfx.lineStyle(1, 0x2a2a4a, 1);
+    this._uiGfx.strokeRect(mmX, mmY, mmW, mmH);
+    this._uiGfx.fillRect(mmX, mmY, mmW, mmH);
+
+    // Draw terrain
+    for (let y = 0; y < map.height; y += 2) {
+      for (let x = 0; x < map.width; x += 2) {
+        const tile = map.tiles[y][x];
+        let color = null;
+        switch (tile) {
+          case TILE.GRASS: color = 0x1e3e1e; break;
+          case TILE.WATER: color = 0x144c88; break;
+          case TILE.ROAD:  case TILE.COBBLE: color = 0x3a3a4e; break;
+          case TILE.TREE:  color = 0x143414; break;
+          case TILE.MOUNTAIN: color = 0x3a3a4e; break;
+        }
+        if (color) {
+          this._uiGfx.fillStyle(color, 1);
+          this._uiGfx.fillRect(mmX + 5 + x * scaleX, mmY + 5 + y * scaleY, Math.max(1, scaleX * 2), Math.max(1, scaleY * 2));
+        }
+      }
+    }
+
+    // Town markers
+    if (map.objects && player) {
+      map.objects.forEach(obj => {
+        if (obj.type === 'town-entrance') {
+          const ind = INDUSTRIES[obj.townId];
+          const c = ind ? Hex2Int(ind.color) : 0xffffff;
+          const isUnlocked = player.unlockedTowns.includes(obj.townId);
+          this._uiGfx.fillStyle(c, isUnlocked ? 1 : 0.3);
+          this._uiGfx.fillRect(mmX + 5 + obj.x * scaleX - 1.5, mmY + 5 + obj.y * scaleY - 1.5, 4, 4);
+        }
+      });
+    }
+
+    // Player dot (blinking)
+    const blink = Math.sin(time * 6) > 0;
+    this._uiGfx.fillStyle(blink ? 0xffffff : (player ? Hex2Int(player.color) : 0xffffff), 1);
+    this._uiGfx.fillRect(mmX + 5 + this._px * scaleX - 2, mmY + 5 + this._py * scaleY - 2, 5, 5);
+  }
+
+  _renderHUD(player) {
+    if (!player) return;
+    this._hudName.setText(`${player.name}  Lv.${player.level}`).setColor(player.color);
+    this._hudHP.setText(`HP: ${Math.ceil(player.hp)} / ${player.maxHp}`);
+    this._hudMP.setText(`MP: ${Math.ceil(player.mp)} / ${player.maxMp}`);
+    this._hudGold.setText(`${player.gold}g`);
+    this._hudFrags.setText(`◆ ${player.cognitiveFragments.length}/14`);
+  }
+}
+
+/* ==========================================================================
+   BATTLE SCENE
+   ========================================================================== */
+class BattleScene extends Phaser.Scene {
+  constructor() { super({ key: 'Battle' }); }
+
+  init(data) {
+    this._enemy = { ...data.enemy, currentHp: data.enemy.maxHp };
+    this._region = data.region || 'digital';
+    this._returnScene = data.returnScene || 'Overworld';
+    this._isBoss = data.isBoss || false;
+  }
+
+  create() {
+    const W = this.scale.width, H = this.scale.height;
+    const player = this.registry.get('player');
+    this._player = player;
+    this._combatPlayer = {
+      hp: player.hp, maxHp: player.maxHp,
+      mp: player.mp, maxMp: player.maxMp,
+      atk: player.atk, def: player.def,
+      spd: player.spd, int: player.int,
+      statusEffect: null, statusTurns: 0,
+      defending: false, buffAtk: 0, buffDef: 0, buffTurns: 0,
+      helperTurns: 0, viralDmg: 0, viralTurns: 0
+    };
+    this._phase = 'choose'; // choose | player-anim | enemy-turn | enemy-anim | result
+    this._animTimer = 0;
+    this._resultTimer = 0;
+    this._result = null;
+    this._log = [];
+    this._selectedAction = 0;
+    this._showAbilities = false;
+    this._showItems = false;
+    this._selectedAbilityIdx = 0;
+    this._selectedItemIdx = 0;
+    this._shakeTarget = null;
+    this._shakeTimer = 0;
+    this._floatingTexts = [];
+
+    // Background
+    const bgKey = getBattleBgForRegion(this._region);
+    if (this.textures.exists(bgKey)) {
+      const bg = this.add.image(W/2, H/2, bgKey).setDisplaySize(W, H);
+      this.add.rectangle(W/2, H/2, W, H, 0x0a0e1a, 0.45);
+    } else {
+      this.add.rectangle(W/2, H/2, W, H, 0x0a0e1a, 1);
+      // Gradient effect
+      const g = this.add.graphics();
+      g.fillGradientStyle(0x0a0e1a, 0x1a1440, 0x0a0e1a, 0x0a1a2a, 1);
+      g.fillRect(0, 0, W, H);
+    }
+
+    // Graphics layers
+    this._bg2Gfx = this.add.graphics();
+    this._enemyGfx = this.add.graphics();
+    this._playerGfx = this.add.graphics();
+    this._uiGfx = this.add.graphics();
+    this._floatGfx = this.add.graphics();
+
+    // Enemy name/info
+    this._enemyNameText = this.add.text(W * 0.75, H * 0.12, this._enemy.name, {
+      fontFamily: "'Cormorant Garamond', serif",
+      fontSize: '26px', fontStyle: 'bold', color: '#ffffff',
+      shadow: { color: '#000', blur: 8, fill: true }
+    }).setOrigin(0.5, 0.5).setDepth(50);
+    this._enemyLvlText = this.add.text(W * 0.75, H * 0.18, `Level ${this._enemy.level}`, {
+      fontFamily: "'Inter', sans-serif",
+      fontSize: '14px', color: '#8888a0'
+    }).setOrigin(0.5, 0.5).setDepth(50);
+
+    // Player name
+    this._playerNameText = this.add.text(W * 0.12, H * 0.62, `${player.name}  Lv.${player.level}`, {
+      fontFamily: "'Inter', sans-serif",
+      fontSize: '15px', fontStyle: 'bold', color: player.color
+    }).setOrigin(0, 0.5).setDepth(50);
+
+    // Action buttons
+    this._actionBtns = [];
+    const actions = ['Attack', 'Defend', 'Ability', 'Item'];
+    const btnColors = [0xff4444, 0x3B82F6, 0xA855F7, 0xF59E0B];
+    actions.forEach((label, i) => {
+      const bx = W * 0.05 + (i % 2) * (W * 0.18);
+      const by = H * 0.78 + Math.floor(i / 2) * 46;
+      const btnGfx = this.add.graphics().setDepth(51);
+      const btnTxt = this.add.text(bx + (W * 0.16) / 2, by + 19, label, {
+        fontFamily: "'Inter', sans-serif",
+        fontSize: '16px', fontStyle: 'bold', color: '#e8e8ec'
+      }).setOrigin(0.5).setDepth(52);
+      const zone = this.add.zone(bx + (W * 0.16) / 2, by + 19, W * 0.16, 38).setInteractive({ cursor: 'pointer' }).setDepth(52);
+      zone.on('pointerdown', () => {
+        if (this._phase !== 'choose' || this._showAbilities || this._showItems) return;
+        this._selectedAction = i;
+        this._executeAction(actions[i]);
+      });
+      this._actionBtns.push({ gfx: btnGfx, txt: btnTxt, bx, by, label, color: btnColors[i], zone, idx: i });
+    });
+
+    // Ability/Item sub-menu container
+    this._subMenuGfx = this.add.graphics().setDepth(60);
+    this._subMenuItems = [];
+
+    // Combat log
+    this._logGfx = this.add.graphics().setDepth(50);
+    this._logTexts = [];
+    for (let i = 0; i < 5; i++) {
+      this._logTexts.push(this.add.text(W * 0.57, H * 0.72 + i * 18, '', {
+        fontFamily: "'Inter', sans-serif",
+        fontSize: '12px', color: '#8888a0'
+      }).setDepth(51));
+    }
+
+    // Floating text pool
+    this._floatTextObjects = [];
+    for (let i = 0; i < 8; i++) {
+      this._floatTextObjects.push(this.add.text(0, 0, '', {
+        fontFamily: "'Inter', sans-serif",
+        fontSize: '20px', fontStyle: 'bold', color: '#ffffff',
+        shadow: { color: '#000', blur: 4, fill: true }
+      }).setDepth(200).setVisible(false));
+    }
+
+    // Input
+    this._cursors = this.input.keyboard.createCursorKeys();
+    this._keyEnter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+    this._keySpace = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    this._keyEsc = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+
+    this._addLog(`Battle starts! ${player.name} vs ${this._enemy.name}!`);
+    this.cameras.main.fadeIn(400, 10, 14, 26);
+  }
+
+  _addLog(msg, color) {
+    this._log.push({ msg, color: color || '#e8e8ec' });
+    const logStart = Math.max(0, this._log.length - 5);
+    this._log.slice(logStart).forEach((entry, i) => {
+      if (this._logTexts[i]) {
+        this._logTexts[i].setText(entry.msg).setColor(i === this._log.length - logStart - 1 ? '#e8e8ec' : '#666677');
+      }
+    });
+  }
+
+  _spawnFloat(text, x, y, color) {
+    const ft = this._floatTextObjects.find(t => !t.visible);
+    if (!ft) return;
+    ft.setPosition(x, y).setText(text).setColor(color || '#ffffff').setAlpha(1).setVisible(true);
+    this.tweens.add({
+      targets: ft,
+      y: y - 50, alpha: 0,
+      duration: 900, ease: 'Power2',
+      onComplete: () => ft.setVisible(false)
+    });
+  }
+
+  _executeAction(action) {
+    const cp = this._combatPlayer, enemy = this._enemy, player = this._player;
+    cp.defending = false;
+
+    switch (action) {
+      case 'Attack': {
+        const baseDmg = Math.max(1, cp.atk + cp.buffAtk - Math.floor(enemy.def * 0.5));
+        const variance = 0.85 + Math.random() * 0.3;
+        const isCrit = Math.random() < 0.1;
+        const dmg = Math.floor(baseDmg * variance * (isCrit ? 1.8 : 1));
+        enemy.currentHp = Math.max(0, enemy.currentHp - dmg);
+        this._shakeTarget = 'enemy'; this._shakeTimer = 0.25;
+        this._addLog(`${player.name} attacks for ${dmg}${isCrit ? ' (CRIT!)' : ''} damage!`, isCrit ? '#ffdd44' : '#e8e8ec');
+        this._spawnFloat(isCrit ? `CRIT! ${dmg}` : `-${dmg}`, this.scale.width * 0.75, this.scale.height * 0.3, isCrit ? '#ffdd44' : '#ff4466');
+        if (isCrit) Audio.critHit(); else Audio.attack();
+        this._phase = 'player-anim'; this._animTimer = 0.5;
+        break;
+      }
+      case 'Defend': {
+        cp.defending = true;
+        this._addLog(`${player.name} takes a defensive stance. DEF+50%, +5 MP`);
+        cp.mp = Math.min(cp.maxMp, cp.mp + 5);
+        Audio.defend();
+        this._phase = 'player-anim'; this._animTimer = 0.4;
+        break;
+      }
+      case 'Ability': {
+        if (player.abilities.length > 0) {
+          this._showAbilities = true;
+          this._selectedAbilityIdx = 0;
+          this._buildSubMenu('ability');
+        }
+        break;
+      }
+      case 'Item': {
+        const usable = player.items.filter(i => i.qty > 0);
+        if (usable.length > 0) {
+          this._showItems = true;
+          this._selectedItemIdx = 0;
+          this._buildSubMenu('item');
+        } else {
+          this._addLog('No items to use!', '#ff6666');
+        }
+        break;
+      }
+    }
+  }
+
+  _buildSubMenu(type) {
+    this._subMenuGfx.clear();
+    this._subMenuItems.forEach(o => o.destroy());
+    this._subMenuItems = [];
+
+    const W = this.scale.width, H = this.scale.height;
+    const player = this._player;
+    const cp = this._combatPlayer;
+
+    const items = type === 'ability'
+      ? player.abilities.map(id => ({ id, data: ABILITIES[id] })).filter(i => i.data)
+      : player.items.filter(i => i.qty > 0).map(i => ({ id: i.id, qty: i.qty, data: ITEMS[i.id] })).filter(i => i.data);
+
+    if (items.length === 0) { this._showAbilities = false; this._showItems = false; return; }
+
+    const menuW = 260, menuItemH = 36;
+    const menuH = Math.min(items.length * menuItemH + 16, H * 0.35);
+    const menuX = W * 0.35, menuY = H * 0.45;
+
+    this._subMenuGfx.fillStyle(0x080c18, 0.95);
+    this._subMenuGfx.lineStyle(1, 0x3a3a5e, 1);
+    this._subMenuGfx.strokeRect(menuX, menuY, menuW, menuH);
+    this._subMenuGfx.fillRect(menuX, menuY, menuW, menuH);
+    this._subMenuGfx.fillStyle(0x4af0c0, 0.8);
+    this._subMenuGfx.fillRect(menuX, menuY, menuW, 3);
+
+    items.forEach((item, i) => {
+      const iy = menuY + 10 + i * menuItemH;
+      const isSelected = type === 'ability' ? i === this._selectedAbilityIdx : i === this._selectedItemIdx;
+      if (isSelected) {
+        this._subMenuGfx.fillStyle(0x4af0c0, 0.12);
+        this._subMenuGfx.fillRect(menuX + 2, iy - 2, menuW - 4, menuItemH - 2);
+      }
+      const label = type === 'ability'
+        ? `${item.data.name}  (${item.data.cost} MP)`
+        : `${item.data.name} x${item.qty}`;
+      const color = type === 'ability'
+        ? (cp.mp >= item.data.cost ? (isSelected ? '#4af0c0' : '#e8e8ec') : '#ff4466')
+        : (isSelected ? '#4af0c0' : '#e8e8ec');
+      const txt = this.add.text(menuX + 12, iy + 10, label, {
+        fontFamily: "'Inter', sans-serif",
+        fontSize: '13px', fontStyle: isSelected ? 'bold' : 'normal', color
+      }).setOrigin(0, 0.5).setDepth(61);
+      txt.setInteractive({ cursor: 'pointer' });
+      txt.on('pointerdown', () => this._useSubMenuItem(type, i, items));
+      this._subMenuItems.push(txt);
+    });
+
+    // Close hint
+    const closeTxt = this.add.text(menuX + menuW - 8, menuY + 8, '[Esc] Cancel', {
+      fontFamily: "'Inter', sans-serif", fontSize: '10px', color: '#666677'
+    }).setOrigin(1, 0).setDepth(61);
+    this._subMenuItems.push(closeTxt);
+  }
+
+  _useSubMenuItem(type, idx, items) {
+    const player = this._player, cp = this._combatPlayer, enemy = this._enemy;
+    if (type === 'ability') {
+      const item = items[idx];
+      if (!item) return;
+      const ab = item.data;
+      if (cp.mp < ab.cost) { this._addLog('Not enough MP!', '#ff4466'); return; }
+      cp.mp -= ab.cost;
+      Audio.ability();
+      this._performAbility(ab, player, cp, enemy);
+    } else {
+      const item = items[idx];
+      if (!item) return;
+      const itemData = item.data;
+      const playerItem = player.items.find(i => i.id === item.id);
+      if (!playerItem || playerItem.qty <= 0) return;
+      playerItem.qty--;
+      this._useItem(itemData, cp, player);
+    }
+    this._showAbilities = false;
+    this._showItems = false;
+    this._subMenuGfx.clear();
+    this._subMenuItems.forEach(o => o.destroy());
+    this._subMenuItems = [];
+    this._phase = 'player-anim';
+    this._animTimer = 0.5;
+  }
+
+  _performAbility(ab, player, cp, enemy) {
+    const W = this.scale.width, H = this.scale.height;
+    switch (ab.type) {
+      case 'damage': {
+        let dmg = Math.floor(cp.int * 2.5);
+        if (ab.name === 'Capital Strike') dmg = Math.floor(cp.int * 4);
+        else if (ab.name === 'Market Crash') dmg = Math.floor(enemy.maxHp * 0.25);
+        else if (ab.name === 'Executive Order') dmg = Math.floor((cp.atk + cp.int) * 2.5);
+        dmg = Math.max(1, dmg);
+        enemy.currentHp = Math.max(0, enemy.currentHp - dmg);
+        this._shakeTarget = 'enemy'; this._shakeTimer = 0.3;
+        this._addLog(`${player.name} uses ${ab.name} for ${dmg} damage!`, '#A855F7');
+        this._spawnFloat(`-${dmg}`, W * 0.75, H * 0.3, '#A855F7');
+        break;
+      }
+      case 'heal': {
+        const healAmt = Math.floor(cp.maxHp * 0.4);
+        cp.hp = Math.min(cp.maxHp, cp.hp + healAmt);
+        player.statusEffect = null;
+        Audio.heal();
+        this._addLog(`${player.name} uses ${ab.name}, restoring ${healAmt} HP!`, '#4af0c0');
+        this._spawnFloat(`+${healAmt}`, W * 0.25, H * 0.45, '#4af0c0');
+        break;
+      }
+      case 'buff': {
+        cp.buffAtk += Math.floor(cp.atk * 0.25);
+        cp.buffDef += Math.floor(cp.def * 0.25);
+        cp.buffTurns = 3;
+        this._addLog(`${player.name} uses ${ab.name}! All stats boosted for 3 turns!`, '#EAB308');
+        this._spawnFloat('BOOST!', W * 0.25, H * 0.45, '#EAB308');
+        break;
+      }
+      case 'debuff': {
+        enemy.def = Math.floor(enemy.def * 0.6);
+        this._addLog(`${player.name} uses ${ab.name}! Enemy DEF reduced!`, '#EC4899');
+        this._spawnFloat('DEF-', W * 0.75, H * 0.3, '#EC4899');
+        break;
+      }
+      case 'summon': {
+        cp.helperTurns = 3;
+        this._addLog(`${player.name} summons a helper bot for 3 turns!`, '#06B6D4');
+        this._spawnFloat('HELPER!', W * 0.25, H * 0.45, '#06B6D4');
+        break;
+      }
+    }
+  }
+
+  _useItem(itemData, cp, player) {
+    const W = this.scale.width, H = this.scale.height;
+    switch (itemData.effect) {
+      case 'hp': {
+        const prev = cp.hp;
+        cp.hp = Math.min(cp.maxHp, cp.hp + itemData.value);
+        Audio.heal();
+        this._addLog(`Used ${itemData.name}, restored ${cp.hp - prev} HP!`, '#4af0c0');
+        this._spawnFloat(`+${cp.hp - prev}`, W * 0.25, H * 0.45, '#4af0c0');
+        break;
+      }
+      case 'mp': {
+        const prev = cp.mp;
+        cp.mp = Math.min(cp.maxMp, cp.mp + itemData.value);
+        this._addLog(`Used ${itemData.name}, restored ${cp.mp - prev} MP!`, '#6366f1');
+        this._spawnFloat(`+${cp.mp - prev} MP`, W * 0.25, H * 0.45, '#6366f1');
+        break;
+      }
+      case 'full': {
+        cp.hp = cp.maxHp; cp.mp = cp.maxMp;
+        Audio.heal();
+        this._addLog(`Used ${itemData.name}! Full HP and MP restored!`, '#4af0c0');
+        this._spawnFloat('FULL RESTORE!', W * 0.25, H * 0.45, '#4af0c0');
+        break;
+      }
+      case 'cure': {
+        cp.statusEffect = null;
+        this._addLog(`Used ${itemData.name}! Status effects cured.`, '#aaffaa');
+        break;
+      }
+      case 'escape': {
+        Audio.mapTravel();
+        this._addLog('Used Smoke Bomb! Escaped!', '#ffffff');
+        this.time.delayedCall(500, () => {
+          this.cameras.main.fadeOut(400, 10, 14, 26);
+          this.cameras.main.once('camerafadeoutcomplete', () => {
+            this._syncPlayerBack();
+            this.scene.start(this._returnScene);
+          });
+        });
+        break;
+      }
+      case 'buff-atk': {
+        cp.buffAtk += itemData.value;
+        cp.buffTurns = Math.max(cp.buffTurns || 0, 3);
+        this._addLog(`Used ${itemData.name}! ATK+${itemData.value} for 3 turns.`, '#ff8844');
+        break;
+      }
+      case 'buff-def': {
+        cp.buffDef += itemData.value;
+        cp.buffTurns = Math.max(cp.buffTurns || 0, 3);
+        this._addLog(`Used ${itemData.name}! DEF+${itemData.value} for 3 turns.`, '#4488ff');
+        break;
+      }
+    }
+  }
+
+  _doEnemyTurn() {
+    const cp = this._combatPlayer, enemy = this._enemy, player = this._player;
+    const W = this.scale.width, H = this.scale.height;
+
+    // Helper bot bonus
+    if (cp.helperTurns > 0) {
+      const helperDmg = Math.floor(cp.atk * 0.5);
+      enemy.currentHp = Math.max(0, enemy.currentHp - helperDmg);
+      cp.helperTurns--;
+      this._addLog(`Helper bot attacks for ${helperDmg}!`, '#06B6D4');
+      this._spawnFloat(`-${helperDmg}`, W * 0.75, H * 0.3, '#06B6D4');
+    }
+
+    // Buff expiry
+    if (cp.buffTurns > 0) { cp.buffTurns--; if (cp.buffTurns <= 0) { cp.buffAtk = 0; cp.buffDef = 0; } }
+
+    // Enemy action
+    const atkMod = Math.random();
+    let dmg;
+    if (atkMod < 0.15) {
+      // Miss
+      this._addLog(`${enemy.name}'s attack missed!`, '#8888a0');
+      return;
+    } else {
+      const baseDmg = Math.max(1, enemy.atk - Math.floor((cp.def + cp.buffDef) * (cp.defending ? 0.75 : 0.5)));
+      const variance = 0.85 + Math.random() * 0.3;
+      const isCrit = Math.random() < 0.08;
+      dmg = Math.floor(baseDmg * variance * (isCrit ? 1.5 : 1));
+      cp.hp = Math.max(0, cp.hp - dmg);
+      this._shakeTarget = 'player'; this._shakeTimer = 0.25;
+      this._addLog(`${enemy.name} attacks for ${dmg}${isCrit ? ' (CRIT!)' : ''} damage!`, isCrit ? '#ffdd44' : '#ff8888');
+      this._spawnFloat(`-${dmg}`, W * 0.18, H * 0.45, isCrit ? '#ffdd44' : '#ff4466');
+      Audio.enemyHit();
+    }
+  }
+
+  _checkResult() {
+    if (this._enemy.currentHp <= 0) return 'victory';
+    if (this._combatPlayer.hp <= 0) return 'defeat';
+    return null;
+  }
+
+  _syncPlayerBack() {
+    const player = this._player;
+    player.hp = this._combatPlayer.hp;
+    player.mp = this._combatPlayer.mp;
+  }
+
+  update(time, delta) {
+    const dt = delta / 1000;
+    if (this._shakeTimer > 0) this._shakeTimer -= dt;
+
+    // Input handling
+    if (this._showAbilities || this._showItems) {
+      const type = this._showAbilities ? 'ability' : 'item';
+      const items = type === 'ability'
+        ? this._player.abilities.map(id => ({ id, data: ABILITIES[id] })).filter(i => i.data)
+        : this._player.items.filter(i => i.qty > 0).map(i => ({ id: i.id, qty: i.qty, data: ITEMS[i.id] })).filter(i => i.data);
+
+      if (Phaser.Input.Keyboard.JustDown(this._keyEsc)) {
+        this._showAbilities = false; this._showItems = false;
+        this._subMenuGfx.clear();
+        this._subMenuItems.forEach(o => o.destroy());
+        this._subMenuItems = [];
+      } else if (Phaser.Input.Keyboard.JustDown(this._cursors.up)) {
+        const idx = type === 'ability' ? this._selectedAbilityIdx : this._selectedItemIdx;
+        if (type === 'ability') this._selectedAbilityIdx = Math.max(0, idx - 1);
+        else this._selectedItemIdx = Math.max(0, idx - 1);
+        this._buildSubMenu(type);
+      } else if (Phaser.Input.Keyboard.JustDown(this._cursors.down)) {
+        const idx = type === 'ability' ? this._selectedAbilityIdx : this._selectedItemIdx;
+        if (type === 'ability') this._selectedAbilityIdx = Math.min(items.length - 1, idx + 1);
+        else this._selectedItemIdx = Math.min(items.length - 1, idx + 1);
+        this._buildSubMenu(type);
+      } else if (Phaser.Input.Keyboard.JustDown(this._keyEnter) || Phaser.Input.Keyboard.JustDown(this._keySpace)) {
+        const idx = type === 'ability' ? this._selectedAbilityIdx : this._selectedItemIdx;
+        this._useSubMenuItem(type, idx, items);
+      }
+    } else {
+      switch (this._phase) {
+        case 'choose':
+          if (Phaser.Input.Keyboard.JustDown(this._cursors.up))   this._selectedAction = (this._selectedAction - 2 + 4) % 4;
+          if (Phaser.Input.Keyboard.JustDown(this._cursors.down)) this._selectedAction = (this._selectedAction + 2) % 4;
+          if (Phaser.Input.Keyboard.JustDown(this._cursors.left)) this._selectedAction = (this._selectedAction % 2 === 1) ? this._selectedAction - 1 : this._selectedAction;
+          if (Phaser.Input.Keyboard.JustDown(this._cursors.right))this._selectedAction = (this._selectedAction % 2 === 0) ? this._selectedAction + 1 : this._selectedAction;
+          if (Phaser.Input.Keyboard.JustDown(this._keyEnter) || Phaser.Input.Keyboard.JustDown(this._keySpace)) {
+            const actions = ['Attack','Defend','Ability','Item'];
+            this._executeAction(actions[this._selectedAction]);
+          }
+          break;
+        case 'player-anim':
+          this._animTimer -= dt;
+          if (this._animTimer <= 0) {
+            const r = this._checkResult();
+            if (r) { this._result = r; this._phase = 'result'; this._resultTimer = 0; }
+            else { this._phase = 'enemy-turn'; this._animTimer = 0.3; }
+          }
+          break;
+        case 'enemy-turn':
+          this._animTimer -= dt;
+          if (this._animTimer <= 0) {
+            this._doEnemyTurn();
+            this._phase = 'enemy-anim'; this._animTimer = 0.6;
+          }
+          break;
+        case 'enemy-anim':
+          this._animTimer -= dt;
+          if (this._animTimer <= 0) {
+            const r = this._checkResult();
+            if (r) { this._result = r; this._phase = 'result'; this._resultTimer = 0; }
+            else this._phase = 'choose';
+          }
+          break;
+        case 'result':
+          this._resultTimer += dt;
+          if (this._resultTimer > 1 && (Phaser.Input.Keyboard.JustDown(this._keyEnter) || Phaser.Input.Keyboard.JustDown(this._keySpace))) {
+            this._endBattle();
+          }
+          break;
+      }
+    }
+
+    this._render(time / 1000);
+  }
+
+  _endBattle() {
+    const player = this._player;
+    const cp = this._combatPlayer;
+
+    if (this._result === 'victory') {
+      Audio.victory();
+      player.gold += this._enemy.goldReward;
+      const leveled = gainXP(player, this._enemy.xpReward);
+      player.hp = cp.hp;
+      player.mp = cp.mp;
+      if (leveled) Audio.levelUp();
+    } else {
+      Audio.defeat();
+      player.hp = Math.max(1, Math.floor(player.maxHp / 2));
+      player.mp = Math.floor(player.maxMp / 2);
+    }
+    this.registry.set('player', player);
+
+    this.cameras.main.fadeOut(400, 10, 14, 26);
+    this.cameras.main.once('camerafadeoutcomplete', () => {
+      this.scene.start(this._returnScene);
+    });
+  }
+
+  _render(time) {
+    const W = this.scale.width, H = this.scale.height;
+    const cp = this._combatPlayer, enemy = this._enemy, player = this._player;
+
+    this._uiGfx.clear();
+    this._enemyGfx.clear();
+    this._playerGfx.clear();
+
+    // Shake
+    const shakeX = (this._shakeTimer > 0) ? (Math.random() - 0.5) * 8 : 0;
+    const enemyOffsetX = this._shakeTarget === 'enemy' ? shakeX : 0;
+    const playerOffsetX = this._shakeTarget === 'player' ? shakeX : 0;
+
+    // Draw enemy
+    this._drawEnemy(this._enemyGfx, W * 0.75 + enemyOffsetX, H * 0.35, enemy, time);
+
+    // Draw player
+    this._drawCombatPlayer(this._playerGfx, W * 0.18 + playerOffsetX, H * 0.42, player, time);
+
+    // Enemy HP bar
+    const epx = W * 0.6, epy = H * 0.22;
+    drawBar(this._uiGfx, epx, epy, 180, 14, enemy.currentHp, enemy.maxHp, 0xff4466, 0x200010);
+    this._uiGfx.fillStyle(0xff4466, 0.8);
+    this._enemyNameText.setX(W * 0.75 + enemyOffsetX);
+
+    // Player stats panel
+    const ppx = W * 0.03, ppy = H * 0.6;
+    this._uiGfx.fillStyle(0x080c18, 0.9);
+    this._uiGfx.lineStyle(1, 0x2a2a4e, 1);
+    this._uiGfx.strokeRect(ppx, ppy, 290, 160);
+    this._uiGfx.fillRect(ppx, ppy, 290, 160);
+    this._uiGfx.fillStyle(Hex2Int(player.color), 0.3);
+    this._uiGfx.fillRect(ppx, ppy, 290, 4);
+    this._playerNameText.setY(H * 0.62 + 2);
+    drawBar(this._uiGfx, ppx + 12, ppy + 36, 255, 14, cp.hp, cp.maxHp, 0x4af0c0, 0x0a2020);
+    drawBar(this._uiGfx, ppx + 12, ppy + 56, 255, 14, cp.mp, cp.maxMp, 0x6366f1, 0x0a0a20);
+    // HP/MP text
+    this._uiGfx.fillStyle(0x4af0c0, 0.7);
+
+    // Action buttons
+    if (this._phase === 'choose' && !this._showAbilities && !this._showItems) {
+      const actions = ['Attack', 'Defend', 'Ability', 'Item'];
+      this._actionBtns.forEach(({ gfx, bx, by, idx, color }) => {
+        const isSelected = idx === this._selectedAction;
+        gfx.clear();
+        gfx.fillStyle(color, isSelected ? 0.35 : 0.15);
+        gfx.lineStyle(1, color, isSelected ? 1 : 0.5);
+        gfx.strokeRoundedRect(bx, by, W * 0.16, 38, 4);
+        gfx.fillRoundedRect(bx, by, W * 0.16, 38, 4);
+        if (isSelected) {
+          gfx.lineStyle(1, color, 0.4);
+          gfx.strokeRoundedRect(bx - 2, by - 2, W * 0.16 + 4, 42, 5);
+        }
+      });
+      this._actionBtns.forEach(({ txt }) => txt.setVisible(true));
+    } else {
+      this._actionBtns.forEach(({ gfx, txt }) => { gfx.clear(); txt.setVisible(false); });
+    }
+
+    // Combat log
+    this._logGfx.clear();
+    this._logGfx.fillStyle(0x060a14, 0.88);
+    this._logGfx.lineStyle(1, 0x2a2a4a, 1);
+    this._logGfx.strokeRect(W * 0.55, H * 0.68, W * 0.42, H * 0.28);
+    this._logGfx.fillRect(W * 0.55, H * 0.68, W * 0.42, H * 0.28);
+
+    // Result overlay
+    if (this._phase === 'result') {
+      const alpha = Math.min(0.8, this._resultTimer * 0.6);
+      this._uiGfx.fillStyle(0x0a0e1a, alpha);
+      this._uiGfx.fillRect(0, 0, W, H);
+      if (this._resultTimer > 1) {
+        // Pulsing continue text drawn elsewhere
+      }
+    }
+  }
+
+  _drawEnemy(g, x, y, enemy, time) {
+    const c = enemy.color || 0xff4466;
+    const bob = Math.sin(time * 1.5) * 3;
+    const hpPct = enemy.currentHp / enemy.maxHp;
+
+    // Shadow
+    g.fillStyle(0x000000, 0.3);
+    g.fillEllipse(x, y + 50, 80, 20);
+
+    // Body (abstract AI entity)
+    g.fillStyle(c, 0.9);
+    g.fillRect(x - 28, y - 20 + bob, 56, 70);
+
+    // Face/features
+    g.fillStyle(0x000000, 0.4);
+    g.fillRect(x - 20, y - 8 + bob, 16, 12);
+    g.fillRect(x + 4, y - 8 + bob, 16, 12);
+
+    // "Eyes" glow
+    g.fillStyle(0xffffff, 0.9);
+    g.fillRect(x - 16, y - 5 + bob, 8, 6);
+    g.fillRect(x + 8, y - 5 + bob, 8, 6);
+
+    // HP-based tinting
+    if (hpPct < 0.3) {
+      g.fillStyle(0xff0000, 0.3 * (1 - hpPct));
+      g.fillRect(x - 28, y - 20 + bob, 56, 70);
+      // Cracked effect
+      g.lineStyle(1, 0xff0000, 0.4);
+      g.lineBetween(x - 10, y - 20 + bob, x, y + 20 + bob);
+      g.lineBetween(x + 5, y - 15 + bob, x + 20, y + 10 + bob);
+    }
+
+    // Glow
+    g.fillStyle(c, 0.2 + Math.sin(time * 3) * 0.1);
+    g.fillCircle(x, y + bob, 48);
+    g.fillStyle(c, 0.1);
+    g.fillCircle(x, y + bob, 64);
+  }
+
+  _drawCombatPlayer(g, x, y, player, time) {
+    const color = Hex2Int(player.color);
+    const bob = Math.sin(time * 2) * 2;
+    const cp = this._combatPlayer;
+
+    g.fillStyle(0x000000, 0.3);
+    g.fillEllipse(x, y + 44, 36, 12);
+    g.fillStyle(color, 0.9);
+    g.fillRect(x - 16, y - 14 + bob, 32, 40);
+    g.fillStyle(0xffffff, 0.1);
+    g.fillRect(x - 16, y - 14 + bob, 32, 8);
+    g.fillStyle(0xe8c8a0, 1);
+    g.fillCircle(x, y - 22 + bob, 14);
+    g.fillStyle(0x3a2010, 1);
+    g.fillCircle(x, y - 28 + bob, 14);
+    g.fillStyle(0xe8c8a0, 1);
+    g.fillRect(x - 14, y - 22 + bob, 28, 14);
+    g.fillStyle(0x333333, 1);
+    g.fillRect(x - 5, y - 23 + bob, 3, 3);
+    g.fillRect(x + 2, y - 23 + bob, 3, 3);
+
+    if (cp.defending) {
+      g.fillStyle(0x3B82F6, 0.4);
+      g.fillCircle(x, y + bob, 30);
+      g.lineStyle(2, 0x3B82F6, 0.8);
+      g.strokeCircle(x, y + bob, 30);
+    }
+    g.fillStyle(color, 0.25);
+    g.fillCircle(x, y + bob, 18);
+  }
+}
+
+/* ==========================================================================
+   DIALOG SCENE (overlay)
+   ========================================================================== */
+class DialogScene extends Phaser.Scene {
+  constructor() { super({ key: 'Dialog' }); }
+
+  init(data) {
+    this._name = data.name || '';
+    this._dialogue = data.dialogue || ['...'];
+    this._color = data.color || '#aaaacc';
+    this._parentScene = data.parentScene || null;
+    this._currentLine = 0;
+    this._charIndex = 0;
+    this._charTimer = 0;
+    this._revealed = false;
+    this._portraitKey = data.portrait || null;
+  }
+
+  create() {
+    const W = this.scale.width, H = this.scale.height;
+    this._gfx = this.add.graphics().setDepth(300);
+
+    // Overlay
+    this._overlay = this.add.rectangle(W/2, H/2, W, H, 0x000000, 0.35).setDepth(299);
+
+    // Name text
+    this._nameText = this.add.text(0, 0, '', {
+      fontFamily: "'Cormorant Garamond', serif",
+      fontSize: '18px', fontStyle: 'bold',
+      color: this._color,
+      shadow: { color: '#000', blur: 6, fill: true }
+    }).setDepth(302);
+
+    // Dialog text
+    this._dialogText = this.add.text(0, 0, '', {
+      fontFamily: "'Inter', sans-serif",
+      fontSize: '14px', color: '#e8e8ec',
+      wordWrap: { width: 600 }
+    }).setDepth(302);
+
+    // Continue arrow
+    this._continueArrow = this.add.text(0, 0, '▼', {
+      fontFamily: "'Inter', sans-serif",
+      fontSize: '14px', color: '#4af0c0'
+    }).setDepth(302).setVisible(false);
+
+    // Page counter
+    this._pageText = this.add.text(0, 0, '', {
+      fontFamily: "'Inter', sans-serif",
+      fontSize: '11px', color: '#555566'
+    }).setDepth(302);
+
+    // Portrait image (if available)
+    this._portraitImg = null;
+    const portraitKey = this._portraitKey || ('portrait-' + this._name.toLowerCase().replace(/[^a-z-]/g, '').replace(/\s+/g, '-'));
+    if (this.textures.exists(portraitKey)) {
+      this._portraitImg = this.add.image(0, 0, portraitKey).setDepth(302);
+    }
+
+    // Input
+    this._spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    this._enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+    this._escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+    this._eKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+
+    this.input.on('pointerdown', () => this._advance());
+
+    this._updateLayout();
+  }
+
+  _updateLayout() {
+    const W = this.scale.width, H = this.scale.height;
+    const boxW = Math.min(720, W * 0.85);
+    const boxH = 150;
+    const boxX = (W - boxW) / 2;
+    const boxY = H - boxH - 30;
+    const colorInt = parseInt(this._color.replace('#', ''), 16);
+
+    this._gfx.clear();
+    this._gfx.fillStyle(0x060a14, 0.95);
+    this._gfx.lineStyle(2, colorInt, 0.7);
+    this._gfx.strokeRoundedRect(boxX, boxY, boxW, boxH, 6);
+    this._gfx.fillRoundedRect(boxX, boxY, boxW, boxH, 6);
+    this._gfx.lineStyle(1, colorInt, 0.3);
+    this._gfx.strokeRoundedRect(boxX + 2, boxY + 2, boxW - 4, boxH - 4, 5);
+
+    // Top accent bar
+    this._gfx.fillStyle(colorInt, 0.4);
+    this._gfx.fillRoundedRect(boxX, boxY, boxW, 3, { tl: 6, tr: 6, bl: 0, br: 0 });
+
+    // Portrait circle or image
+    if (this._portraitImg) {
+      this._portraitImg.setPosition(boxX + 48, boxY + boxH/2);
+      this._portraitImg.setDisplaySize(72, 72);
+      // Circular mask
+      const mask = this.make.graphics({add: false});
+      mask.fillStyle(0xffffff, 1);
+      mask.fillCircle(boxX + 48, boxY + boxH/2, 38);
+      this._portraitImg.setMask(mask.createGeometryMask());
+    } else {
+      // Fallback circle
+      const colorInt2 = parseInt(this._color.replace('#', ''), 16);
+      this._gfx.fillStyle(colorInt2, 0.25);
+      this._gfx.fillCircle(boxX + 48, boxY + boxH/2, 36);
+      this._gfx.fillStyle(colorInt2, 0.7);
+      this._gfx.fillCircle(boxX + 48, boxY + boxH/2 - 8, 10);
+      this._gfx.fillStyle(colorInt2, 0.7);
+      this._gfx.fillRect(boxX + 40, boxY + boxH/2 + 4, 16, 18);
+    }
+
+    // Name
+    this._nameText.setPosition(boxX + 90, boxY + 14);
+    this._dialogText.setPosition(boxX + 90, boxY + 38);
+    this._dialogText.setWordWrapWidth(boxW - 105);
+    this._continueArrow.setPosition(boxX + boxW - 22, boxY + boxH - 22);
+    this._pageText.setPosition(boxX + boxW - 20, boxY + 12).setOrigin(1, 0);
+    this._pageText.setText(`${this._currentLine + 1}/${this._dialogue.length}`);
+
+    this._nameText.setText(this._name).setColor(this._color);
+  }
+
+  _advance() {
+    if (!this._revealed) {
+      // Skip typewriter
+      this._charIndex = this._dialogue[this._currentLine].length;
+      this._revealed = true;
+    } else {
+      this._currentLine++;
+      if (this._currentLine >= this._dialogue.length) {
+        this._close();
+        return;
+      }
+      this._charIndex = 0;
+      this._charTimer = 0;
+      this._revealed = false;
+      this._continueArrow.setVisible(false);
+    }
+    this._updateLayout();
+  }
+
+  _close() {
+    Audio.uiClick();
+    if (this._parentScene) {
+      this.scene.stop();
+      this.scene.resume(this._parentScene);
+    } else {
+      this.scene.stop();
+    }
+  }
+
+  update(time, delta) {
+    const dt = delta / 1000;
+
+    // Typewriter
+    if (!this._revealed && this._dialogue[this._currentLine]) {
+      this._charTimer += dt;
+      while (this._charTimer >= 0.03 && this._charIndex < this._dialogue[this._currentLine].length) {
+        this._charIndex++;
+        this._charTimer -= 0.03;
+        if (this._charIndex % 3 === 0) Audio.textBlip();
+      }
+      if (this._charIndex >= this._dialogue[this._currentLine].length) this._revealed = true;
+    }
+
+    const line = this._dialogue[this._currentLine] || '';
+    this._dialogText.setText(line.substring(0, this._charIndex));
+    this._continueArrow.setVisible(this._revealed);
+
+    // Blink arrow
+    if (this._revealed) {
+      this._continueArrow.setAlpha(0.6 + Math.sin(time * 0.006) * 0.4);
+    }
+
+    // Key input
+    if (Phaser.Input.Keyboard.JustDown(this._enterKey) || Phaser.Input.Keyboard.JustDown(this._spaceKey) || Phaser.Input.Keyboard.JustDown(this._eKey)) {
+      this._advance();
+    }
+    if (Phaser.Input.Keyboard.JustDown(this._escKey)) {
+      this._close();
+    }
+  }
+}
+
+/* ==========================================================================
+   INSIGHT SCENE (overlay for knowledge points)
+   ========================================================================== */
+class InsightScene extends Phaser.Scene {
+  constructor() { super({ key: 'Insight' }); }
+
+  init(data) {
+    this._insight = data.insight;
+    this._player = data.player || null;
+    this._parentScene = data.parentScene || null;
+    this._awarded = false;
+  }
+
+  create() {
+    const W = this.scale.width, H = this.scale.height;
+    const insight = this._insight;
+    const player = this._player || this.registry.get('player');
+    if (insight && player) this._awarded = addInsight(player, insight.id);
+    this.registry.set('player', player);
+
+    // Overlay
+    this.add.rectangle(W/2, H/2, W, H, 0x000000, 0.65).setDepth(400);
+
+    const panelW = Math.min(520, W * 0.65);
+    const panelH = 300;
+    const px = (W - panelW) / 2;
+    const py = (H - panelH) / 2;
+
+    const typeColors = { trend: '#3B82F6', tension: '#ff4466', impact: '#4af0c0' };
+    const typeColor = typeColors[(insight && insight.type) || 'trend'] || '#4af0c0';
+    const typeColorInt = parseInt(typeColor.replace('#',''), 16);
+
+    const g = this.add.graphics().setDepth(401);
+    g.fillStyle(0x060a14, 0.98);
+    g.lineStyle(2, typeColorInt, 0.8);
+    g.strokeRoundedRect(px, py, panelW, panelH, 8);
+    g.fillRoundedRect(px, py, panelW, panelH, 8);
+    g.fillStyle(typeColorInt, 0.4);
+    g.fillRoundedRect(px, py, panelW, 3, { tl: 8, tr: 8, bl: 0, br: 0 });
+
+    // Type badge
+    this.add.text(px + 16, py + 14, (insight ? insight.type : 'INSIGHT').toUpperCase(), {
+      fontFamily: "'Inter', sans-serif", fontSize: '11px', fontStyle: 'bold',
+      color: typeColor, letterSpacing: 2
+    }).setDepth(402);
+
+    // Title
+    this.add.text(px + 16, py + 36, insight ? insight.title : 'Insight', {
+      fontFamily: "'Cormorant Garamond', serif",
+      fontSize: '22px', fontStyle: 'bold', color: '#ffffff'
+    }).setDepth(402);
+
+    // Big stat
+    this.add.text(px + panelW / 2, py + 90, insight ? insight.stat : '', {
+      fontFamily: "'Cormorant Garamond', serif",
+      fontSize: '46px', fontStyle: 'bold', color: typeColor,
+      shadow: { color: typeColor, blur: 20, fill: true }
+    }).setOrigin(0.5, 0.5).setDepth(402);
+
+    this.add.text(px + panelW / 2, py + 126, insight ? insight.statLabel : '', {
+      fontFamily: "'Inter', sans-serif", fontSize: '12px', color: '#8888a0'
+    }).setOrigin(0.5, 0.5).setDepth(402);
+
+    // Summary
+    this.add.text(px + 16, py + 158, insight ? insight.summary : '', {
+      fontFamily: "'Inter', sans-serif", fontSize: '13px', color: '#c8c8d0',
+      wordWrap: { width: panelW - 32 }
+    }).setDepth(402);
+
+    // Award notice
+    if (this._awarded) {
+      this.add.text(px + panelW / 2, py + 250, '✦ Knowledge Absorbed! Stats increased!', {
+        fontFamily: "'Inter', sans-serif", fontSize: '14px', fontStyle: 'bold', color: '#4af0c0'
+      }).setOrigin(0.5, 0.5).setDepth(402);
+    }
+
+    // Close hint
+    this.add.text(px + panelW / 2, py + panelH - 14, 'Press Enter / Space to close', {
+      fontFamily: "'Inter', sans-serif", fontSize: '11px', color: '#555566'
+    }).setOrigin(0.5, 1).setDepth(402);
+
+    // Input
+    this._enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+    this._spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    this._escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+    this.input.on('pointerdown', () => this._close());
+  }
+
+  update() {
+    if (Phaser.Input.Keyboard.JustDown(this._enterKey) || Phaser.Input.Keyboard.JustDown(this._spaceKey) || Phaser.Input.Keyboard.JustDown(this._escKey)) {
+      this._close();
+    }
+  }
+
+  _close() {
+    Audio.uiClick();
+    this.scene.stop();
+    if (this._parentScene) this.scene.resume(this._parentScene);
+  }
+}
+
+/* ==========================================================================
+   SHOP SCENE (overlay)
+   ========================================================================== */
+class ShopScene extends Phaser.Scene {
+  constructor() { super({ key: 'Shop' }); }
+
+  init(data) {
+    this._items = data.items || [];
+    this._title = data.title || 'Shop';
+    this._parentScene = data.parentScene || null;
+    this._selectedIdx = 0;
+    this._message = '';
+    this._messageTimer = 0;
+  }
+
+  create() {
+    const W = this.scale.width, H = this.scale.height;
+    const player = this.registry.get('player');
+    this._player = player;
+
+    this.add.rectangle(W/2, H/2, W, H, 0x000000, 0.65).setDepth(400);
+
+    const panelW = Math.min(520, W * 0.65);
+    const panelH = Math.min(420, H * 0.7);
+    const px = (W - panelW) / 2;
+    const py = (H - panelH) / 2;
+
+    this._gfx = this.add.graphics().setDepth(401);
+    this._drawPanel(px, py, panelW, panelH, player);
+
+    // Title
+    this._titleText = this.add.text(px + 16, py + 16, this._title, {
+      fontFamily: "'Cormorant Garamond', serif",
+      fontSize: '24px', fontStyle: 'bold', color: '#4af0c0'
+    }).setDepth(402);
+
+    // Gold
+    this._goldText = this.add.text(px + panelW - 16, py + 20, `${player.gold}g`, {
+      fontFamily: "'Inter', sans-serif",
+      fontSize: '16px', fontStyle: 'bold', color: '#EAB308'
+    }).setOrigin(1, 0).setDepth(402);
+
+    // Item list
+    this._itemTexts = [];
+    this._itemZones = [];
+    this._items.forEach((itemId, i) => {
+      const item = ITEMS[itemId];
+      if (!item) return;
+      const iy = py + 60 + i * 44;
+      const nameTxt = this.add.text(px + 20, iy + 8, item.name, {
+        fontFamily: "'Inter', sans-serif", fontSize: '15px', color: '#e8e8ec'
+      }).setDepth(402);
+      const descTxt = this.add.text(px + 20, iy + 26, item.desc, {
+        fontFamily: "'Inter', sans-serif", fontSize: '11px', color: '#8888a0'
+      }).setDepth(402);
+      const costTxt = this.add.text(px + panelW - 20, iy + 16, `${item.cost}g`, {
+        fontFamily: "'Inter', sans-serif",
+        fontSize: '15px', fontStyle: 'bold',
+        color: player.gold >= item.cost ? '#EAB308' : '#ff4466'
+      }).setOrigin(1, 0.5).setDepth(402);
+      const zone = this.add.zone(px + panelW/2, iy + 22, panelW - 4, 40).setInteractive({ cursor: 'pointer' }).setDepth(402);
+      zone.on('pointerdown', () => { this._selectedIdx = i; this._buy(i); });
+      zone.on('pointerover', () => { this._selectedIdx = i; this._refreshPanel(px, py, panelW, panelH, player); });
+      this._itemTexts.push({ nameTxt, descTxt, costTxt, iy });
+      this._itemZones.push(zone);
+    });
+
+    // Message
+    this._msgText = this.add.text(px + panelW/2, py + panelH - 58, '', {
+      fontFamily: "'Inter', sans-serif", fontSize: '14px', fontStyle: 'bold', color: '#4af0c0'
+    }).setOrigin(0.5, 0.5).setDepth(402);
+
+    // Leave button
+    const leaveGfx = this.add.graphics().setDepth(401);
+    const leaveTxt = this.add.text(px + panelW/2, py + panelH - 26, 'Leave', {
+      fontFamily: "'Inter', sans-serif", fontSize: '16px', fontStyle: 'bold', color: '#e8e8ec'
+    }).setOrigin(0.5, 0.5).setDepth(402);
+    leaveGfx.fillStyle(0x2a2a4a, 0.8);
+    leaveGfx.lineStyle(1, 0x4a4a6a, 1);
+    leaveGfx.strokeRoundedRect(px + panelW/2 - 55, py + panelH - 40, 110, 30, 4);
+    leaveGfx.fillRoundedRect(px + panelW/2 - 55, py + panelH - 40, 110, 30, 4);
+    const leaveZone = this.add.zone(px + panelW/2, py + panelH - 26, 110, 30).setInteractive({ cursor: 'pointer' }).setDepth(402);
+    leaveZone.on('pointerdown', () => this._close());
+
+    // Input
+    this._upKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
+    this._downKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
+    this._enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+    this._escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+
+    this._px = px; this._py = py; this._panelW = panelW; this._panelH = panelH;
+  }
+
+  _drawPanel(px, py, panelW, panelH, player) {
+    this._gfx.clear();
+    this._gfx.fillStyle(0x060a14, 0.96);
+    this._gfx.lineStyle(1, 0x3a3a5e, 1);
+    this._gfx.strokeRoundedRect(px, py, panelW, panelH, 6);
+    this._gfx.fillRoundedRect(px, py, panelW, panelH, 6);
+    this._gfx.fillStyle(0x4af0c0, 0.4);
+    this._gfx.fillRoundedRect(px, py, panelW, 3, { tl: 6, tr: 6, bl: 0, br: 0 });
+    // Selection highlight
+    const idx = this._selectedIdx;
+    if (idx >= 0 && idx < this._items.length) {
+      const iy = py + 60 + idx * 44;
+      this._gfx.fillStyle(0x4af0c0, 0.08);
+      this._gfx.fillRect(px + 2, iy, panelW - 4, 42);
+    }
+  }
+
+  _refreshPanel(px, py, panelW, panelH, player) {
+    this._drawPanel(px, py, panelW, panelH, player);
+  }
+
+  _buy(idx) {
+    const player = this._player;
+    const itemId = this._items[idx];
+    const item = ITEMS[itemId];
+    if (!item) return;
+    if (player.gold >= item.cost) {
+      player.gold -= item.cost;
+      const existing = player.items.find(i => i.id === itemId);
+      if (existing) existing.qty++;
+      else player.items.push({ id: itemId, qty: 1 });
+      Audio.buy();
+      this._message = `Bought ${item.name}!`;
+      this._messageTimer = 1.5;
+      this._goldText.setText(`${player.gold}g`);
+      this.registry.set('player', player);
+    } else {
+      this._message = 'Not enough gold!';
+      this._messageTimer = 1.5;
+    }
+    this._drawPanel(this._px, this._py, this._panelW, this._panelH, player);
+  }
+
+  _close() {
+    Audio.uiClick();
+    this.scene.stop();
+    if (this._parentScene) this.scene.resume(this._parentScene);
+  }
+
+  update(time, delta) {
+    const dt = delta / 1000;
+    if (this._messageTimer > 0) {
+      this._messageTimer -= dt;
+      this._msgText.setText(this._message).setAlpha(Math.min(1, this._messageTimer * 2));
+    } else {
+      this._msgText.setText('');
+    }
+
+    if (Phaser.Input.Keyboard.JustDown(this._upKey)) {
+      this._selectedIdx = Math.max(0, this._selectedIdx - 1);
+      this._drawPanel(this._px, this._py, this._panelW, this._panelH, this._player);
+    }
+    if (Phaser.Input.Keyboard.JustDown(this._downKey)) {
+      this._selectedIdx = Math.min(this._items.length - 1, this._selectedIdx + 1);
+      this._drawPanel(this._px, this._py, this._panelW, this._panelH, this._player);
+    }
+    if (Phaser.Input.Keyboard.JustDown(this._enterKey)) this._buy(this._selectedIdx);
+    if (Phaser.Input.Keyboard.JustDown(this._escKey)) this._close();
+  }
+}
+
+/* ==========================================================================
+   INVENTORY SCENE (overlay)
+   ========================================================================== */
+class InventoryScene extends Phaser.Scene {
+  constructor() { super({ key: 'Inventory' }); }
+
+  init(data) {
+    this._parentScene = data.parentScene || null;
+    this._tab = 0; // 0=Stats, 1=Abilities, 2=Items, 3=Knowledge
+  }
+
+  create() {
+    const W = this.scale.width, H = this.scale.height;
+    const player = this.registry.get('player');
+    this._player = player;
+
+    this.add.rectangle(W/2, H/2, W, H, 0x000000, 0.65).setDepth(400);
+
+    const panelW = Math.min(620, W * 0.75);
+    const panelH = Math.min(480, H * 0.78);
+    const px = (W - panelW) / 2;
+    const py = (H - panelH) / 2;
+    this._px = px; this._py = py; this._panelW = panelW; this._panelH = panelH;
+
+    this._gfx = this.add.graphics().setDepth(401);
+    this._contentGfx = this.add.graphics().setDepth(401);
+    this._contentTexts = [];
+    this._tabTexts = [];
+
+    const tabs = ['Stats', 'Abilities', 'Items', 'Knowledge'];
+    this._tabTexts = tabs.map((t, i) => {
+      const tx = px + 10 + i * (panelW / tabs.length);
+      const txt = this.add.text(tx + (panelW / tabs.length)/2 - 5, py + 22, t, {
+        fontFamily: "'Inter', sans-serif", fontSize: '14px', color: '#8888a0'
+      }).setOrigin(0.5, 0.5).setDepth(402);
+      const zone = this.add.zone(tx + (panelW / tabs.length)/2, py + 22, panelW / tabs.length - 8, 28).setInteractive({ cursor: 'pointer' }).setDepth(402);
+      zone.on('pointerdown', () => { this._tab = i; Audio.uiClick(); this._refresh(); });
+      return txt;
+    });
+
+    // Close button
+    this.add.text(px + panelW - 18, py + 16, '✕', {
+      fontFamily: "'Inter', sans-serif", fontSize: '16px', color: '#8888a0'
+    }).setOrigin(0.5, 0.5).setDepth(402).setInteractive({ cursor: 'pointer' }).on('pointerdown', () => this._close());
+
+    // Input
+    this._escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+    this._iKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.I);
+    this._leftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
+    this._rightKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
+
+    this._refresh();
+  }
+
+  _refresh() {
+    const W = this.scale.width;
+    const { px, py, panelW, panelH, _player: player } = this;
+    const tabs = ['Stats', 'Abilities', 'Items', 'Knowledge'];
+
+    // Clear
+    this._gfx.clear();
+    this._contentGfx.clear();
+    this._contentTexts.forEach(t => t.destroy());
+    this._contentTexts = [];
+
+    // Panel
+    this._gfx.fillStyle(0x060a14, 0.97);
+    this._gfx.lineStyle(1, 0x3a3a5e, 1);
+    this._gfx.strokeRoundedRect(px, py, panelW, panelH, 6);
+    this._gfx.fillRoundedRect(px, py, panelW, panelH, 6);
+    this._gfx.fillStyle(Hex2Int(player ? player.color : '#4af0c0'), 0.4);
+    this._gfx.fillRoundedRect(px, py, panelW, 3, { tl: 6, tr: 6, bl: 0, br: 0 });
+
+    // Tabs
+    this._tabTexts.forEach((txt, i) => {
+      txt.setColor(i === this._tab ? '#4af0c0' : '#8888a0');
+      txt.setFontStyle(i === this._tab ? 'bold' : 'normal');
+      if (i === this._tab) {
+        this._gfx.fillStyle(0x4af0c0, 0.8);
+        this._gfx.fillRect(px + 10 + i * (panelW / tabs.length) + 10, py + 36, panelW / tabs.length - 20, 2);
+      }
+    });
+
+    const contentY = py + 50;
+    if (!player) return;
+
+    switch (this._tab) {
+      case 0: this._renderStats(contentY); break;
+      case 1: this._renderAbilities(contentY); break;
+      case 2: this._renderItems(contentY); break;
+      case 3: this._renderKnowledge(contentY); break;
+    }
+  }
+
+  _addTxt(x, y, text, style) {
+    const t = this.add.text(x, y, text, style).setDepth(402);
+    this._contentTexts.push(t);
+    return t;
+  }
+
+  _renderStats(contentY) {
+    const { px, panelW, _player: player } = this;
+    const p = player;
+
+    // Portrait
+    const portraitKey = 'portrait-' + p.portrait;
+    if (this.textures.exists(portraitKey)) {
+      const img = this.add.image(px + 60, contentY + 50, portraitKey).setDisplaySize(80, 80).setDepth(402);
+      const mask = this.make.graphics({ add: false });
+      mask.fillStyle(0xffffff, 1);
+      mask.fillCircle(px + 60, contentY + 50, 42);
+      img.setMask(mask.createGeometryMask());
+      this._contentTexts.push(img);
+    } else {
+      this._contentGfx.fillStyle(Hex2Int(p.color), 0.3);
+      this._contentGfx.fillCircle(px + 60, contentY + 50, 40);
+    }
+
+    this._addTxt(px + 120, contentY + 18, p.name, { fontFamily: "'Cormorant Garamond', serif", fontSize: '24px', fontStyle: 'bold', color: p.color });
+    this._addTxt(px + 120, contentY + 46, p.title, { fontFamily: "'Inter', sans-serif", fontSize: '14px', color: '#8888a0' });
+    this._addTxt(px + 120, contentY + 66, `Level ${p.level}  |  ${p.xp}/${p.xpToNext} XP`, { fontFamily: "'Inter', sans-serif", fontSize: '13px', color: '#e8e8ec' });
+    // XP bar
+    drawBar(this._contentGfx, px + 120, contentY + 84, panelW - 140, 10, p.xp, p.xpToNext, 0xEAB308, 0x1a1400);
+
+    this._addTxt(px + panelW - 16, contentY + 14, `${p.gold}g`, { fontFamily: "'Inter', sans-serif", fontSize: '18px', fontStyle: 'bold', color: '#EAB308' }).setOrigin(1, 0);
+    this._addTxt(px + panelW - 16, contentY + 36, `◆ ${p.cognitiveFragments.length}/14`, { fontFamily: "'Inter', sans-serif", fontSize: '13px', color: '#4af0c0' }).setOrigin(1, 0);
+    this._addTxt(px + panelW - 16, contentY + 54, `📚 ${p.totalInsightsRead}/44 insights`, { fontFamily: "'Inter', sans-serif", fontSize: '12px', color: '#8888a0' }).setOrigin(1, 0);
+
+    const stats = [
+      ['HP', p.hp, p.maxHp, 0x4af0c0],
+      ['MP', p.mp, p.maxMp, 0x6366f1],
+      ['ATK', p.atk, 50, 0xff4466],
+      ['DEF', p.def, 50, 0x3B82F6],
+      ['SPD', p.spd, 30, 0xF59E0B],
+      ['INT', p.int, 50, 0xA855F7]
+    ];
+
+    const statsY = contentY + 116;
+    stats.forEach(([label, val, max, color], i) => {
+      const sy = statsY + i * 32;
+      this._addTxt(px + 20, sy + 4, label, { fontFamily: "'Inter', sans-serif", fontSize: '13px', fontStyle: 'bold', color: '#8888a0' });
+      drawBar(this._contentGfx, px + 58, sy, panelW * 0.45, 16, val, max, color, 0x1a1a2e);
+      this._addTxt(px + 68 + panelW * 0.45, sy + 2, `${Math.floor(val)}`, { fontFamily: "'Inter', sans-serif", fontSize: '13px', fontStyle: 'bold', color: '#e8e8ec' });
+    });
+
+    // Equipment
+    const eqY = statsY + stats.length * 32 + 10;
+    this._addTxt(px + 20, eqY, 'Equipment:', { fontFamily: "'Inter', sans-serif", fontSize: '14px', fontStyle: 'bold', color: '#e8e8ec' });
+    if (p.equipment.length === 0) {
+      this._addTxt(px + 20, eqY + 20, 'None', { fontFamily: "'Inter', sans-serif", fontSize: '13px', color: '#555' });
+    } else {
+      p.equipment.forEach((eqId, i) => {
+        const eq = EQUIPMENT.find(e => e.id === eqId);
+        if (eq) this._addTxt(px + 20, eqY + 20 + i * 18, `${eq.name} — ${eq.desc}`, { fontFamily: "'Inter', sans-serif", fontSize: '12px', color: '#c8c8d0' });
+      });
+    }
+  }
+
+  _renderAbilities(contentY) {
+    const { px, panelW, _player: player } = this;
+    if (player.abilities.length === 0) {
+      this._addTxt(px + 20, contentY + 20, 'No abilities unlocked yet.', { fontFamily: "'Inter', sans-serif", fontSize: '14px', color: '#555' });
+      this._addTxt(px + 20, contentY + 44, 'Read all insights in a town to unlock its special ability.', { fontFamily: "'Inter', sans-serif", fontSize: '13px', color: '#555' });
+      return;
+    }
+    player.abilities.forEach((abId, i) => {
+      const ab = ABILITIES[abId];
+      if (!ab) return;
+      const ay = contentY + 12 + i * 58;
+      this._contentGfx.fillStyle(0x1a1a2e, 0.6);
+      this._contentGfx.fillRoundedRect(px + 12, ay - 4, panelW - 24, 50, 4);
+      this._addTxt(px + 20, ay + 4, ab.name, { fontFamily: "'Cormorant Garamond', serif", fontSize: '18px', fontStyle: 'bold', color: '#4af0c0' });
+      this._addTxt(px + 20, ay + 24, `${ab.cost} MP  —  ${ab.desc}`, { fontFamily: "'Inter', sans-serif", fontSize: '12px', color: '#8888a0' });
+      this._addTxt(px + panelW - 20, ay + 4, ab.type.toUpperCase(), {
+        fontFamily: "'Inter', sans-serif", fontSize: '11px', fontStyle: 'bold',
+        color: ab.type === 'damage' ? '#ff4466' : ab.type === 'heal' ? '#4af0c0' : ab.type === 'buff' ? '#EAB308' : '#A855F7'
+      }).setOrigin(1, 0);
+    });
+  }
+
+  _renderItems(contentY) {
+    const { px, panelW, _player: player } = this;
+    const usable = player.items.filter(i => i.qty > 0);
+    if (usable.length === 0) {
+      this._addTxt(px + 20, contentY + 20, 'No items in your inventory.', { fontFamily: "'Inter', sans-serif", fontSize: '14px', color: '#555' });
+      return;
+    }
+    usable.forEach((item, i) => {
+      const data = ITEMS[item.id];
+      if (!data) return;
+      const iy = contentY + 12 + i * 40;
+      this._addTxt(px + 20, iy, `${data.name}  x${item.qty}`, { fontFamily: "'Inter', sans-serif", fontSize: '14px', fontStyle: 'bold', color: '#e8e8ec' });
+      this._addTxt(px + 20, iy + 20, data.desc, { fontFamily: "'Inter', sans-serif", fontSize: '12px', color: '#8888a0' });
+    });
+  }
+
+  _renderKnowledge(contentY) {
+    const { px, panelW, _player: player } = this;
+    let y = contentY + 8;
+    Object.keys(INDUSTRIES).forEach(key => {
+      const ind = INDUSTRIES[key];
+      const read = player.insightsByIndustry[key] || [];
+      const total = ind.insights.length;
+      const complete = read.length >= total;
+      const hasFragment = player.cognitiveFragments.includes(key);
+      const indColor = ind.color;
+
+      this._contentGfx.fillStyle(Hex2Int(indColor), complete ? 0.15 : 0.05);
+      this._contentGfx.fillRoundedRect(px + 10, y - 2, panelW - 20, 24, 3);
+
+      this._addTxt(px + 18, y + 4, `${hasFragment ? '◆' : '◇'} ${ind.name}`, {
+        fontFamily: "'Inter', sans-serif", fontSize: '13px', fontStyle: complete ? 'bold' : 'normal',
+        color: complete ? indColor : '#8888a0'
+      });
+      this._addTxt(px + panelW - 20, y + 4, `${read.length}/${total}`, {
+        fontFamily: "'Inter', sans-serif", fontSize: '12px', color: complete ? indColor : '#555566'
+      }).setOrigin(1, 0);
+      drawBar(this._contentGfx, px + panelW / 2, y + 6, panelW * 0.3, 8, read.length, total, Hex2Int(indColor), 0x1a1a2e);
+      y += 28;
+    });
+  }
+
+  _close() {
+    Audio.uiClick();
+    this._contentTexts.forEach(t => t.destroy());
+    this.scene.stop();
+    if (this._parentScene) this.scene.resume(this._parentScene);
+  }
+
+  update() {
+    if (Phaser.Input.Keyboard.JustDown(this._escKey) || Phaser.Input.Keyboard.JustDown(this._iKey)) this._close();
+    if (Phaser.Input.Keyboard.JustDown(this._leftKey)) {
+      this._tab = (this._tab - 1 + 4) % 4;
+      Audio.uiClick();
+      this._refresh();
+    }
+    if (Phaser.Input.Keyboard.JustDown(this._rightKey)) {
+      this._tab = (this._tab + 1) % 4;
+      Audio.uiClick();
+      this._refresh();
+    }
+  }
+}
+
+/* ==========================================================================
+   PHASER GAME CONFIGURATION & LAUNCH
+   ========================================================================== */
+// Update loading bar as images load
+(function setupLoadingBar() {
+  const images = [
+    'img-title', 'img-battle-digital', 'img-battle-corporate',
+    'img-battle-knowledge', 'img-battle-power',
+    'portrait-alex-chen', 'portrait-maya-torres', 'portrait-james-wright',
+    'portrait-zara-kim', 'portrait-kai-rhythm', 'portrait-diana-price',
+    'portrait-marcus-gold', 'portrait-sarah-lane', 'portrait-ravi-patel',
+    'portrait-victoria-chase', 'portrait-tom-realty', 'portrait-jade-spark',
+    'portrait-commander-hayes', 'portrait-ada-future'
+  ];
+  let loaded = 0;
+  const bar = document.getElementById('load-bar-fill');
+  const status = document.getElementById('load-status');
+
+  function onLoad() {
+    loaded++;
+    const pct = Math.floor((loaded / images.length) * 80);
+    if (bar) bar.style.width = pct + '%';
+    if (status) status.textContent = `Loading assets... ${loaded}/${images.length}`;
+  }
+
+  images.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) { onLoad(); return; }
+    if (el.complete && el.naturalWidth > 0) { onLoad(); return; }
+    el.onload = onLoad;
+    el.onerror = onLoad;
   });
+})();
+
+function startPhaser() {
+  const gameConfig = {
+    type: Phaser.AUTO,
+    width: 1024,
+    height: 768,
+    backgroundColor: '#0a0e1a',
+    parent: 'game-container',
+    scene: [
+      BootScene,
+      PreloadScene,
+      TitleScene,
+      CharSelectScene,
+      TownScene,
+      OverworldScene,
+      BattleScene,
+      DialogScene,
+      InsightScene,
+      ShopScene,
+      InventoryScene
+    ],
+    scale: {
+      mode: Phaser.Scale.FIT,
+      autoCenter: Phaser.Scale.CENTER_BOTH,
+      min: { width: 640, height: 480 },
+      max: { width: 1920, height: 1080 }
+    },
+    render: {
+      antialias: true,
+      pixelArt: false,
+      roundPixels: false
+    }
+  };
+
+  // Initialize audio system on first interaction
+  document.addEventListener('click', () => {
+    Audio.init();
+    Audio.resume();
+  }, { once: true });
+  document.addEventListener('keydown', () => {
+    Audio.init();
+    Audio.resume();
+  }, { once: true });
+
+  const game = new Phaser.Game(gameConfig);
+  return game;
+}
+
+// Wait for fonts + Phaser to load, then start
+document.fonts.ready.then(() => {
+  if (typeof Phaser !== 'undefined') {
+    startPhaser();
+  } else {
+    // Fallback: wait for Phaser script
+    const checkPhaser = setInterval(() => {
+      if (typeof Phaser !== 'undefined') {
+        clearInterval(checkPhaser);
+        startPhaser();
+      }
+    }, 100);
+  }
 });
 </script>
 </body>
