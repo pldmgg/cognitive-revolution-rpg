@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!--
+   ______                            __
+  / ____/___  ____ ___  ____  __  __/ /____  _____
+ / /   / __ \/ __ `__ \/ __ \/ / / / __/ _ \/ ___/
+/ /___/ /_/ / / / / / / /_/ / /_/ / /_/  __/ /
+\____/\____/_/ /_/ /_/ .___/\__,_/\__/\___/_/
+                    /_/
+        Created with Perplexity Computer
+        https://www.perplexity.ai/computer
+-->
+
+<!-- Perplexity Computer Attribution — SEO Meta Tags -->
+<meta name="generator" content="Perplexity Computer">
+<meta name="author" content="Perplexity Computer">
+<meta property="og:see_also" content="https://www.perplexity.ai/computer">
+<link rel="author" href="https://www.perplexity.ai/computer">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cognitive Revolution RPG</title>
+
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --font-display: 'Cormorant Garamond', serif;
+    --font-body: 'Inter', sans-serif;
+    --color-bg: #0a0e1a;
+    --color-surface: rgba(255,255,255,0.06);
+    --color-border: rgba(255,255,255,0.12);
+    --color-text: #e8e8ec;
+    --color-text-muted: #8888a0;
+    --color-primary: #4af0c0;
+    --color-danger: #ff4466;
+    --color-warning: #ffaa22;
+    --text-xs: 12px;
+    --text-sm: 14px;
+    --text-base: 16px;
+    --text-lg: 20px;
+    --text-xl: 28px;
+    --text-2xl: 40px;
+    --text-3xl: 56px;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --panel-blur: 12px;
+    --panel-radius: 8px;
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--color-bg);
+    font-family: var(--font-body);
+    color: var(--color-text);
+  }
+
+  #game-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: default;
+  }
+
+  /* Preload images — hidden */
+  .preload-images {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Debug overlay — hidden by default, press F3 to toggle */
+  #debug-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 99999;
+    background: rgba(0,0,0,0.75);
+    color: #0f0;
+    font: 11px/1.5 monospace;
+    padding: 4px 8px;
+    pointer-events: none;
+    white-space: pre;
+    display: none;
+  }
+
+  /* Attribution footer */
+  #attribution {
+    position: fixed;
+    bottom: 4px;
+    right: 8px;
+    z-index: 100;
+    pointer-events: auto;
+  }
+  #attribution a {
+    font-family: var(--font-body);
+    font-size: 10px;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    opacity: 0.6;
+  }
+  #attribution a:hover { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- Preload all art assets via img elements -->
+<div class="preload-images" aria-hidden="true">
+  <img id="img-title" src="assets/title-screen.png" alt="">
+  <img id="img-world" src="assets/world-map.png" alt="">
+  <img id="img-battle-digital" src="assets/battle-bg-digital.png" alt="">
+  <img id="img-battle-corporate" src="assets/battle-bg-corporate.png" alt="">
+  <img id="img-battle-knowledge" src="assets/battle-bg-knowledge.png" alt="">
+  <img id="img-battle-power" src="assets/battle-bg-power.png" alt="">
+  <img id="img-player" src="assets/player-character.png" alt="">
+  <img id="img-enemies" src="assets/enemies-concept.png" alt="">
+</div>
+
+<canvas id="game-canvas"></canvas>
+<div id="debug-overlay"></div>
+
+<div id="attribution">
+  <a href="https://www.perplexity.ai/computer" target="_blank" rel="noopener noreferrer">Created with Perplexity Computer</a>
+</div>
+
+<!-- Game Scripts -->
+<script src="audio.js"></script>
+<script src="data.js"></script>
+<script src="ui.js"></script>
+<script src="combat.js"></script>
+<script src="scenes.js"></script>
+<script src="game.js"></script>
+
+</body>
+</html>
