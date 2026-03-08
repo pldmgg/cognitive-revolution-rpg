@@ -928,10 +928,9 @@ class TownScene extends Phaser.Scene {
   }
 
   _updateCameraImmediate() {
-    const W = this.scale.width, H = this.scale.height;
     const pos = tileToScreen(this._px, this._py, 0, 0);
-    this._camX = pos.x - W/2;
-    this._camY = pos.y - H/3;
+    this._camX = pos.x;
+    this._camY = pos.y;
     this._camTargetX = this._camX;
     this._camTargetY = this._camY;
   }
@@ -1134,8 +1133,8 @@ class TownScene extends Phaser.Scene {
     // Camera lerp
     const W = this.scale.width, H = this.scale.height;
     const pos = tileToScreen(this._renderX, this._renderY, 0, 0);
-    this._camTargetX = pos.x - W/2;
-    this._camTargetY = pos.y - H/3;
+    this._camTargetX = pos.x;
+    this._camTargetY = pos.y;
     this._camX += (this._camTargetX - this._camX) * 0.1;
     this._camY += (this._camTargetY - this._camY) * 0.1;
 
@@ -1562,10 +1561,9 @@ class OverworldScene extends Phaser.Scene {
   }
 
   _updateCameraImmediate() {
-    const W = this.scale.width, H = this.scale.height;
     const pos = tileToScreen(this._px, this._py, 0, 0);
-    this._camX = pos.x - W/2;
-    this._camY = pos.y - H/3;
+    this._camX = pos.x;
+    this._camY = pos.y;
     this._camTargetX = this._camX;
     this._camTargetY = this._camY;
   }
@@ -1686,8 +1684,8 @@ class OverworldScene extends Phaser.Scene {
     // Camera lerp
     const W = this.scale.width, H = this.scale.height;
     const pos = tileToScreen(this._renderX, this._renderY, 0, 0);
-    this._camTargetX = pos.x - W/2;
-    this._camTargetY = pos.y - H/3;
+    this._camTargetX = pos.x;
+    this._camTargetY = pos.y;
     this._camX += (this._camTargetX - this._camX) * 0.1;
     this._camY += (this._camTargetY - this._camY) * 0.1;
 
