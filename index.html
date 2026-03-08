@@ -20,131 +20,126 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cognitive Revolution RPG</title>
-
-<!-- Google Fonts -->
+<title>Cognitive Revolution RPG — The AI Transformation Journey</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
 <style>
-  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-  :root {
-    --font-display: 'Cormorant Garamond', serif;
-    --font-body: 'Inter', sans-serif;
-    --color-bg: #0a0e1a;
-    --color-surface: rgba(255,255,255,0.06);
-    --color-border: rgba(255,255,255,0.12);
-    --color-text: #e8e8ec;
-    --color-text-muted: #8888a0;
-    --color-primary: #4af0c0;
-    --color-danger: #ff4466;
-    --color-warning: #ffaa22;
-    --text-xs: 12px;
-    --text-sm: 14px;
-    --text-base: 16px;
-    --text-lg: 20px;
-    --text-xl: 28px;
-    --text-2xl: 40px;
-    --text-3xl: 56px;
-    --space-1: 4px;
-    --space-2: 8px;
-    --space-3: 12px;
-    --space-4: 16px;
-    --space-6: 24px;
-    --space-8: 32px;
-    --panel-blur: 12px;
-    --panel-radius: 8px;
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { 
+    width: 100%; height: 100%; overflow: hidden;
+    background: #0a0e1a; color: #e8e8ec;
+    font-family: 'Inter', sans-serif;
   }
-
-  html, body {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background: var(--color-bg);
-    font-family: var(--font-body);
-    color: var(--color-text);
-  }
-
   #game-canvas {
     display: block;
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
+    image-rendering: auto;
     cursor: default;
   }
-
-  /* Preload images — hidden */
-  .preload-images {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    opacity: 0;
-    pointer-events: none;
+  #loading-screen {
+    position: fixed; inset: 0; z-index: 100;
+    background: #0a0e1a;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    transition: opacity 0.5s;
   }
-
-  /* Debug overlay — hidden by default, press F3 to toggle */
-  #debug-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 99999;
-    background: rgba(0,0,0,0.75);
-    color: #0f0;
-    font: 11px/1.5 monospace;
-    padding: 4px 8px;
-    pointer-events: none;
-    white-space: pre;
-    display: none;
+  #loading-screen.hidden { opacity: 0; pointer-events: none; }
+  #loading-screen h1 {
+    font-size: 36px; font-weight: 700; color: #4af0c0;
+    margin-bottom: 16px; letter-spacing: 2px;
   }
-
-  /* Attribution footer */
-  #attribution {
-    position: fixed;
-    bottom: 4px;
-    right: 8px;
-    z-index: 100;
-    pointer-events: auto;
+  #loading-screen .bar-bg {
+    width: 300px; height: 6px; border-radius: 3px;
+    background: rgba(255,255,255,0.1);
   }
-  #attribution a {
-    font-family: var(--font-body);
-    font-size: 10px;
-    color: var(--color-text-muted);
-    text-decoration: none;
-    opacity: 0.6;
+  #loading-screen .bar-fill {
+    height: 100%; border-radius: 3px;
+    background: #4af0c0; width: 0%;
+    transition: width 0.3s;
   }
-  #attribution a:hover { opacity: 1; }
+  #loading-screen .load-text {
+    margin-top: 12px; font-family: 'Inter', sans-serif;
+    font-size: 13px; color: #8888a0;
+  }
+  footer {
+    position: fixed; bottom: 6px; right: 10px; z-index: 50;
+    font-size: 11px; opacity: 0.4;
+  }
+  footer a { color: #8888a0; text-decoration: none; }
+  footer a:hover { color: #4af0c0; }
 </style>
 </head>
 <body>
 
-<!-- Preload all art assets via img elements -->
-<div class="preload-images" aria-hidden="true">
-  <img id="img-title" src="assets/title-screen.png" alt="">
-  <img id="img-world" src="assets/world-map.png" alt="">
-  <img id="img-battle-digital" src="assets/battle-bg-digital.png" alt="">
-  <img id="img-battle-corporate" src="assets/battle-bg-corporate.png" alt="">
-  <img id="img-battle-knowledge" src="assets/battle-bg-knowledge.png" alt="">
-  <img id="img-battle-power" src="assets/battle-bg-power.png" alt="">
-  <img id="img-player" src="assets/player-character.png" alt="">
-  <img id="img-enemies" src="assets/enemies-concept.png" alt="">
+<div id="loading-screen">
+  <h1>COGNITIVE REVOLUTION</h1>
+  <div class="bar-bg"><div class="bar-fill" id="load-bar"></div></div>
+  <div class="load-text" id="load-text">Loading assets...</div>
 </div>
 
 <canvas id="game-canvas"></canvas>
-<div id="debug-overlay"></div>
 
-<div id="attribution">
+<!-- Preload battle backgrounds and title screen via <img> -->
+<img id="img-title" src="assets/title-screen.png" style="display:none">
+<img id="img-battle-digital" src="assets/battle-bg-digital.png" style="display:none">
+<img id="img-battle-corporate" src="assets/battle-bg-corporate.png" style="display:none">
+<img id="img-battle-knowledge" src="assets/battle-bg-knowledge.png" style="display:none">
+<img id="img-battle-power" src="assets/battle-bg-power.png" style="display:none">
+<img id="img-player" src="assets/player-character.png" style="display:none">
+
+<footer>
   <a href="https://www.perplexity.ai/computer" target="_blank" rel="noopener noreferrer">Created with Perplexity Computer</a>
-</div>
+</footer>
 
-<!-- Game Scripts -->
+<script src="ui.js"></script>
 <script src="audio.js"></script>
 <script src="data.js"></script>
-<script src="ui.js"></script>
 <script src="combat.js"></script>
+<script src="tilemap.js"></script>
+<script src="player.js"></script>
 <script src="scenes.js"></script>
-<script src="game.js"></script>
+<script src="engine.js"></script>
 
+<script>
+// Wait for fonts and images, then start
+document.fonts.ready.then(() => {
+  const images = [
+    'img-title', 'img-battle-digital', 'img-battle-corporate',
+    'img-battle-knowledge', 'img-battle-power', 'img-player'
+  ];
+  let loaded = 0;
+  const total = images.length;
+  const bar = document.getElementById('load-bar');
+  const text = document.getElementById('load-text');
+
+  function checkReady() {
+    loaded++;
+    const pct = Math.floor((loaded / total) * 100);
+    bar.style.width = pct + '%';
+    text.textContent = `Loading assets... ${loaded}/${total}`;
+    if (loaded >= total) {
+      setTimeout(() => {
+        document.getElementById('loading-screen').classList.add('hidden');
+        setTimeout(() => {
+          document.getElementById('loading-screen').style.display = 'none';
+          Engine.init();
+        }, 500);
+      }, 300);
+    }
+  }
+
+  images.forEach(id => {
+    const img = document.getElementById(id);
+    if (img.complete && img.naturalWidth > 0) {
+      checkReady();
+    } else {
+      img.onload = checkReady;
+      img.onerror = checkReady;
+    }
+  });
+});
+</script>
 </body>
 </html>
